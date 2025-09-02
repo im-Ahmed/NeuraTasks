@@ -1,7 +1,8 @@
-import SubHeading from "@/components/subHeading";
+import SubHeading from "@/components/ui/subHeading";
 import Navabr from "../components/ui/navbar";
 import H1 from "@/components/ui/mainHeading";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -14,10 +15,14 @@ const Hero = () => {
         <H1 heading="Organize Smarter, Work Faster" />
         <SubHeading />
         <div className="flex gap-8 ">
-          <Button size={"lg"}>Get started</Button>
-          <Button size={"lg"} variant={"secondary"}>
-            Login
-          </Button>
+          <Link to="/signUp" className="lg">
+            <Button size={"lg"}>Get started</Button>
+          </Link>
+          <Link to={"/login"}>
+            <Button size={"lg"} variant={"secondary"}>
+              Login
+            </Button>
+          </Link>
         </div>
       </main>
     </div>
