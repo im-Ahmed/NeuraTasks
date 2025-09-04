@@ -22,7 +22,10 @@ const userSchema = new Schema(
     role: {
       type: String,
       required: true,
-      enum: ["admin", "member"],
+      enum: {
+        values: ["admin", "member"],
+        message: "Role should be an admin or member",
+      },
     },
     avatar: {
       type: String,
@@ -38,9 +41,9 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.pre("save", async function (next) {
-  if (!isModified(this.password)) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+userSchema.pre("save", function (next) {
+  if (!this.isModified(this.password)) return next();
+  this.password = bcrypt.hash(this.password, 10);
   next;
 });
 userSchema.methods.isPasswordCorrect = async function (password) {

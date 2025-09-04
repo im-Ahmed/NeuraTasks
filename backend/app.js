@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { LIMIT } from "./constants";
+import { LIMIT } from "./constants.js";
 import dotenvx from "@dotenvx/dotenvx";
 dotenvx.config();
 const app = express();
@@ -24,8 +24,15 @@ app.use(
 app.use(
   express.urlencoded({
     extended: true,
+    limit: LIMIT,
   })
 );
 // handle cookies
 app.use(cookieParser());
+// Import routers
+import userRouter from "./src/routes/user.route.js";
+
+// declare routes
+app.use("/api/v1/users", userRouter);
+
 export { app };
