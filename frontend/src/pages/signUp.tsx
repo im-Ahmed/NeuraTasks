@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { PiCameraPlus } from "react-icons/pi";
 import AuthLeft from "@/components/ui/authLeft";
+import { ButtonLoading } from "@/components/ui/loadingButton";
 
 const SignUp = () => {
   const name = useRef<HTMLInputElement>(null);
@@ -28,6 +30,7 @@ const SignUp = () => {
   const password = useRef<HTMLInputElement>(null);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState<Boolean>(false);
 
   const [role, setRole] = useState<string>("");
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,22 +42,49 @@ const SignUp = () => {
   };
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+
     if (role === "") {
       alert("Please select a role");
-    } else if (avatar === null) {
+      return;
+    }
+    if (avatar === null) {
       alert("Please select an avatar");
-    } else {
-      const data = {
-        name: name.current?.value || "",
-        email: email.current?.value || "",
-        password: password.current?.value || "",
-        role: role || "",
-        avatar: avatar,
-      };
-      console.log(avatar);
-      console.log(data);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", name.current?.value || "");
+    formData.append("email", email.current?.value || "");
+    formData.append("password", password.current?.value || "");
+    formData.append("role", role);
+    formData.append("avatar", avatar);
+
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/v1/users/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // 👈 important for Multer
+        },
+      });
+      alert(response.data.message);
+      console.log(response.data);
+      setLoading(false);
+    } catch (err: any) {
+      if (axios.isAxiosError(err)) {
+        // If backend sent a custom error message
+        const backendMessage = err.response?.data?.message;
+
+        if (backendMessage) {
+          alert(backendMessage); // show custom backend message
+        } else {
+          alert("Unexpected error occurred.");
+        }
+      } else {
+        alert("Something went wrong: " + err.message);
+      }
     }
   };
+
   return (
     <div className=" flex h-screen">
       {/* left Side Background */}
@@ -144,10 +174,13 @@ const SignUp = () => {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <div className="flex items-center"></div>
-                    <Button type="submit" className="w-full">
-                      Sign Up
-                    </Button>
+                    {loading ? (
+                      <ButtonLoading />
+                    ) : (
+                      <Button type="submit" className="w-full">
+                        Sign Up
+                      </Button>
+                    )}
                   </div>
                 </div>
               </form>
