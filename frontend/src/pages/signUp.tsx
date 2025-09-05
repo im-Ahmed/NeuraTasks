@@ -70,6 +70,8 @@ const SignUp = () => {
       console.log(response.data);
       setLoading(false);
     } catch (err: any) {
+      setLoading(false);
+
       if (axios.isAxiosError(err)) {
         // If backend sent a custom error message
         const backendMessage = err.response?.data?.message;

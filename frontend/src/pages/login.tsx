@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,18 +12,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import AuthLeft from "@/components/ui/authLeft";
+import axios from "axios";
+import { ButtonLoading } from "@/components/ui/loadingButton";
 const Login = () => {
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
-  const handleSubmit = () => {
-    const data = {
-      email: email.current?.value,
-      password: password.current?.value,
-    };
-    console.log(email?.current?.value);
-    console.log(password?.current?.value);
-    console.log(data);
+  const [loading, setLoading] = useState<boolean>(false);
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/v1/users/login", {
+        email: email.current?.value || "",
+        password: password.current?.value || "",
+      });
+      setLoading(false);
+      alert(response.data.message);
+    } catch (err: any) {
+      setLoading(false);
+      if (axios.isAxiosError(err)) {
+        alert(
+          err.response?.data.message || err.message || "something went wrong"
+        );
+      }
+    }
   };
+
   return (
     <div className=" flex h-screen">
       {/* Left Side Background */}
@@ -82,10 +95,13 @@ const Login = () => {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <div className="flex items-center"></div>
-                    <Button type="submit" className="w-full">
-                      Login
-                    </Button>
+                    {loading ? (
+                      <ButtonLoading />
+                    ) : (
+                      <Button type="submit" className="w-full">
+                        Login
+                      </Button>
+                    )}
                   </div>
                 </div>
               </form>
