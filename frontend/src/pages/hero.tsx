@@ -1,5 +1,5 @@
 import SubHeading from "@/components/ui/subHeading";
-import Navabr from "../components/ui/navbar";
+import Navbar from "../components/ui/navbar";
 import H1 from "@/components/ui/mainHeading";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 const Hero = () => {
   return (
     <div className="bg-neutral-800 text-white w-screen h-screen">
-      <Navabr></Navabr>
+      <Navbar></Navbar>
       <main
         className="flex flex-col items-center justify-center gap-8 lg:gap-12 w-screen
       h-auto my-30"
