@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { isAdmin } from "../middlewares/isAdmin.middleware";
-import { createBoard } from "../controllers/board.controller";
-import { verifyJWT } from "../middlewares/auth.middleware";
+import { isAdmin } from "../middlewares/isAdmin.middleware.js";
+import { createBoard } from "../controllers/board.controller.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 // Secure Routes

@@ -35,6 +35,6 @@ import boardRouter from "./src/routes/board.route.js";
 
 // declare routes
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/board", boardRouter);
+app.use("/api/v1/boards", boardRouter);
 
 export { app };
