@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const commentSchema = new Scheme(
+const commentSchema = new Schema(
   {
     task: {
       type: Schema.Types.ObjectId,

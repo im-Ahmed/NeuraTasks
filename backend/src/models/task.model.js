@@ -1,4 +1,4 @@
-import  { Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const taskSchema = new Schema(
   {
@@ -18,21 +18,21 @@ const taskSchema = new Schema(
       type: Date,
       required: true,
     },
-    assignedTo: {
-      type: Schema.Types.ObjectId,
-      ref: "Board",
-    },
+    assignedTo: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Board",
+      },
+    ],
     priority: {
       type: String,
       required: true,
-      lowercase: true,
-      enum: ["high", "low", "normal"],
+      enum: ["HIGH", "LOW", "NORMAL"],
     },
     status: {
       type: String,
       required: true,
-      lowercase: true,
-      enum: ["Todo", "In Progress", "Done", "Blocked"],
+      enum: ["TODO", "IN-PROGRESS", "DONE", "BLOCKED"],
     },
   },
   {

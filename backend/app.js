@@ -32,9 +32,13 @@ app.use(cookieParser());
 // Import routers
 import userRouter from "./src/routes/user.route.js";
 import boardRouter from "./src/routes/board.route.js";
+import taskRouter from "./src/routes/task.route.js";
+import commentRouter from "./src/routes/comment.route.js";
 
 // declare routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/boards", boardRouter);
+app.use("/api/v1/tasks", taskRouter);
+app.use("/api/v1/comments", commentRouter);
 
 export { app };
