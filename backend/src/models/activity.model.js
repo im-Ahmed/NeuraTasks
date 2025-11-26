@@ -4,12 +4,12 @@ const detailSchema = new Schema({
   oldStatus: {
     type: String,
     required: true,
-    enum: ["Todo", "In Progress", "Done", "Blocked"],
+    enum: ["TODO", "IN-PROGRESS", "DONE", "BLOCKED"],
   },
   newStatus: {
     type: String,
     required: true,
-    enum: ["Todo", "In Progress", "Done", "Blocked"],
+    enum: ["TODO", "IN-PROGRESS", "DONE", "BLOCKED"],
   },
 });
 const activitySchema = new Schema(
@@ -33,7 +33,7 @@ const activitySchema = new Schema(
     details: detailSchema,
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 

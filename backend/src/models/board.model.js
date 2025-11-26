@@ -22,7 +22,7 @@ const boardSchema = new Schema(
     ],
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 
