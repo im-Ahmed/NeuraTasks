@@ -63,7 +63,9 @@ const deleteTask = asyncHandler(async (req, res) => {
   } catch (err) {
     console.log(err || "Failed to delete task");
   }
-  res.status(200).json(new ApiResponse(200, {}, "task deleted successfully"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "task deleted successfully"));
 });
 const allTasks = asyncHandler(async (req, res) => {
   const { boardId } = req.params;
@@ -83,7 +85,6 @@ const updateTaskDetails = asyncHandler(async (req, res) => {
   const { taskId } = req.params;
   const { newPriority, newStatus, newDueDate } = req.body;
   ValidateId(taskId);
-  ValidateId(userId);
   if (
     [newPriority, newStatus, newDueDate].some((field) => field.trim() === "")
   ) {
@@ -107,13 +108,32 @@ const updateTaskDetails = asyncHandler(async (req, res) => {
     }
   );
   if (!updatedTask) {
-    throw new ApiError(500, "Failed to update task details");
+    throw new ApiError(
+      500,
+      "Failed to update might be the user is not autherized to update task"
+    );
   }
-  res
+  return res
     .status(200)
     .json(
       new ApiResponse(200, { updatedTask }, "Successfully update task details")
     );
 });
+const getAllUserTasks = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const userTasks = await Task.find({
+    assignedTo: {
+      $in: [userId],
+    },
+  });
+  if (!userTasks) {
+    throw new ApiError(500, "Failed to get user tasks");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { userTasks }, "User tasks fetched successfully")
+    );
+});
 
-export { createTask, deleteTask, allTasks, updateTaskDetails };
+export { createTask, deleteTask, allTasks, updateTaskDetails, getAllUserTasks };

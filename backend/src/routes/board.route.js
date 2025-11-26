@@ -11,9 +11,8 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 // Secure Routes
-router.use(verifyJWT); 
+router.use(verifyJWT, isAdmin); // apply middeleware to all routes below (only admin access)
 router.route("/").get(getAllBoard);
-router.use(isAdmin); // apply middeleware to all routes below (only admin access)
 router.route("/create").post(createBoard);
 router.route("/b/:boardId").delete(deleteBoard).patch(updateBoardDetails);
 router.route("/m/:boardId").patch(updateBoardMembers);
