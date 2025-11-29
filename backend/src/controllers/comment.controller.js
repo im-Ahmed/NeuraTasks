@@ -71,9 +71,36 @@ const editComment = asyncHandler(async (req, res, next) => {
 const allComments = asyncHandler(async (req, res, next) => {
   const { taskId } = req.params;
   ValidateId(taskId);
-  const comments = await Comment.find({
-    task: taskId,
-  });
+  const comments = await Comment.aggregate([
+    {
+      $match: {
+        task: new mongoose.Types.ObjectId(taskId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "commentBY",
+        foreignField: "_id",
+        as: "commentUser",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        commentUser: 1,
+        message: 1,
+      },
+    },
+  ]);
+
   return res
     .status(200)
     .json(

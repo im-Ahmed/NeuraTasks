@@ -19,6 +19,8 @@ const createActivity = asyncHandler(async (req, res) => {
   if (!action) {
     throw new ApiError(401, "Action is required");
   }
+  ValidateId(board);
+  ValidateId(task);
   const activity = await Activity.create({
     action,
     board,
@@ -36,7 +38,63 @@ const createActivity = asyncHandler(async (req, res) => {
     );
 });
 const getActivityLog = asyncHandler(async (req, res) => {
-  const activityLog = await Activity.find({});
+  const activityLog = await Activity.aggregate([
+    {
+      $lookup: {
+        from: "tasks",
+        localField: "task",
+        foreignField: "_id",
+        as: "taskName",
+        pipeline: [
+          {
+            $project: {
+              title: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "boards",
+        localField: "board",
+        foreignField: "_id",
+        as: "boardName",
+        pipeline: [
+          {
+            $project: {
+              title: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "actor",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        action: 1,
+        details: 1,
+        actor: 1,
+        taskName: 1,
+        boardName: 1,
+      },
+    },
+  ]);
+  // const activityLog = await Activity.find({});
   if (!activityLog) {
     throw new ApiError(200, "Failed to fetch activiy log");
   }

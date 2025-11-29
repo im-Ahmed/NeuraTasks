@@ -46,11 +46,43 @@ const createBoard = asyncHandler(async (req, res, next) => {
     .json(new ApiResponse(201, board, "Board created successfully"));
 });
 const getAllBoard = asyncHandler(async (req, res, next) => {
-  const user = req.user;
-  const boards = await Board.find({ createdBy: user._id });
+  const userId = req.user._id;
+  const boards = await Board.aggregate([
+    {
+      $match: {
+        createdBy: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "members",
+        foreignField: "_id",
+        as: "allMembers",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              role: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        title: 1,
+        description: 1,
+        allMembers: 1,
+      },
+    },
+  ]);
   return res
     .status(200)
-    .json(new ApiResponse(500, boards, "All boards are fetched successfully"));
+    .json(
+      new ApiResponse(500, { boards }, "All boards are fetched successfully")
+    );
 });
 const deleteBoard = asyncHandler(async (req, res, next) => {
   const { boardId } = req.params;

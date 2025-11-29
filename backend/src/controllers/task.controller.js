@@ -70,9 +70,35 @@ const deleteTask = asyncHandler(async (req, res) => {
 const allTasks = asyncHandler(async (req, res) => {
   const { boardId } = req.params;
   ValidateId(boardId);
-  const tasks = await Task.find({
-    board: boardId,
-  });
+  const tasks = await Task.aggregate([
+    {
+      $match: {
+        board: new mongoose.Types.ObjectId(boardId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "assignedTo",
+        foreignField: "_id",
+        as: "assignedMembers",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        assignedTo: 0,
+      },
+    },
+  ]);
+  
   if (!tasks) {
     throw new ApiError(500, "Failed to fetch all tasks");
   }
@@ -125,7 +151,7 @@ const getAllUserTasks = asyncHandler(async (req, res) => {
     assignedTo: {
       $in: [userId],
     },
-  });
+  }).select("-assignedTo");
   if (!userTasks) {
     throw new ApiError(500, "Failed to get user tasks");
   }
