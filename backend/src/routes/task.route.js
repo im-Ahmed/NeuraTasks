@@ -8,6 +8,7 @@ import {
   getAllUserTasks,
   updateTaskDetails,
 } from "../controllers/task.controller.js";
+import { handleCommentOnTaskDelete } from "../middlewares/handleTaskDelete.middleware.js";
 
 const router = Router();
 // Secure routes
@@ -18,6 +19,6 @@ router.route("/").get(getAllUserTasks);
 router.use(isAdmin); // apply middeleware to all routes below (only admin access)
 router.route("/b/:boardId").get(allTasks);
 router.route("/create").post(createTask);
-router.route("/d/:taskId").delete(deleteTask);
+router.route("/d/:taskId").delete(handleCommentOnTaskDelete,deleteTask);
 
 export default router;

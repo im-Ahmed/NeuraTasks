@@ -8,12 +8,16 @@ import {
   updateBoardMembers,
 } from "../controllers/board.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { handleTaskOnBoardDelete } from "../middlewares/handleBoardDelete.middleware.js";
 
 const router = Router();
 // Secure Routes
 router.use(verifyJWT, isAdmin); // apply middeleware to all routes below (only admin access)
 router.route("/").get(getAllBoard);
 router.route("/create").post(createBoard);
-router.route("/b/:boardId").delete(deleteBoard).patch(updateBoardDetails);
+router
+  .route("/b/:boardId")
+  .delete(handleTaskOnBoardDelete, deleteBoard)
+  .patch(updateBoardDetails);
 router.route("/m/:boardId").patch(updateBoardMembers);
 export default router;

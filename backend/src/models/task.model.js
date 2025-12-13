@@ -21,7 +21,7 @@ const taskSchema = new Schema(
     assignedTo: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Board",
+        ref: "User",
       },
     ],
     priority: {

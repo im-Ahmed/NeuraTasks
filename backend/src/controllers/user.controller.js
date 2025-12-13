@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary_upload.js";
+import { deleteFromCloudinary } from "../utils/Cloudinary_remove.js";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -122,4 +123,17 @@ const logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
-export { registerUser, loginUser, logoutUser };
+const deleteUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const avatar = req.user.avatar;
+  try {
+    await User.findByIdAndDelete(userId);
+    await deleteFromCloudinary(avatar);
+  } catch (err) {
+    throw new ApiError(500, "Failed to delete the user");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User deleted Successfully"));
+});
+export { registerUser, loginUser, logoutUser, deleteUser };
