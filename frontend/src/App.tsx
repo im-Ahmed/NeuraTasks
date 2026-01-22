@@ -4,6 +4,7 @@ import Login from "./pages/login";
 import SignUp from "./pages/signUp";
 import Dashboard from "./pages/dashboard";
 import Layout from "./components/Layout";
+import Board from "./pages/boards";
 
 function App() {
   return (
@@ -16,7 +17,8 @@ function App() {
         {/* protected routes */}
         <Route path="/dashboard" element={<Layout />}>
           <Route index element={<Dashboard />} key="dashboard" />
-          <Route path="inbox" element={<h1>inbox</h1>} key="inbox" />{" "}
+          <Route path="board" element={<Board/>} key="board" />
+          <Route path="inbox" element={<h1>Calendar Page</h1>} key="inbox" />
           <Route path="calendar" element={<h1>Calendar Page</h1>} />
           <Route path="search" element={<h1>Search Page</h1>} />
           <Route path="settings" element={<h1>Settings Page</h1>} />

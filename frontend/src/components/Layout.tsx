@@ -8,7 +8,7 @@ export default function Layout() {
     <SidebarProvider>
       <AppSidebar />
       <main className="flex-1 bg-neutral-800 text-white w-screen h-screen">
-        <SidebarTrigger />
+        <SidebarTrigger className="absolute opacity-[0] hover:opacity-[100] "/>
         <Outlet /> {/* renders nested pages */}
       </main>
     </SidebarProvider>

@@ -9,6 +9,7 @@ import {
   Edit,
   Delete,
   ChevronUp,
+  Notebook,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -35,6 +36,7 @@ import { Link } from "react-router-dom";
 const items = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "Inbox", url: "/dashboard/inbox", icon: Inbox },
+  { title: "Boards", url: "/dashboard/board", icon: Notebook },
   { title: "Calendar", url: "/dashboard/calendar", icon: Calendar },
   { title: "Search", url: "/dashboard/search", icon: Search },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
