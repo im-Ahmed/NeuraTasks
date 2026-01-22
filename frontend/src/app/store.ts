@@ -1,8 +1,11 @@
+import { boardApi } from "@/features/board/boardSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
 // Add the reducers to define the workflows
 export const store = configureStore({
-    reducer:{
-        
-    }
+  reducer: {
+    [boardApi.reducerPath]: boardApi.reducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(boardApi.middleware),
 });

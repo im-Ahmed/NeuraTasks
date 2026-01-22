@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const NotFound = () => {
+const NotFound: React.FC = () => {
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-[#262626] px-4 text-center">
       {/* 404 Code */}

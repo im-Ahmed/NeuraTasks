@@ -5,6 +5,7 @@ import SignUp from "./pages/signUp";
 import Dashboard from "./pages/dashboard";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
+import TestScreen from "./pages/TestScreen";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="search" element={<h1>Search Page</h1>} />
           <Route path="settings" element={<h1>Settings Page</h1>} />
         </Route>
+        <Route path="test" element={<TestScreen />}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </Router>

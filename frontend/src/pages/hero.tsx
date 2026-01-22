@@ -3,8 +3,9 @@ import Navbar from "../components/ui/navbar";
 import H1 from "@/components/ui/mainHeading";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import type React from "react";
 
-const Hero = () => {
+const Hero: React.FC = () => {
   return (
     <div className="bg-neutral-800 text-white w-screen h-screen">
       <Navbar></Navbar>

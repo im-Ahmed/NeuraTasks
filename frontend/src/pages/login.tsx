@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import AuthLeft from "@/components/ui/authLeft";
 import axios from "axios";
 import { ButtonLoading } from "@/components/ui/loadingButton";
-const Login = () => {
+const Login: React.FC = () => {
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -26,12 +26,12 @@ const Login = () => {
         password: password.current?.value || "",
       });
       setLoading(false);
-      alert(response.data.message);
+      localStorage.setItem("accessToken", response.data.data.accessToken);
     } catch (err: any) {
       setLoading(false);
       if (axios.isAxiosError(err)) {
         alert(
-          err.response?.data.message || err.message || "something went wrong"
+          err.response?.data.message || err.message || "something went wrong",
         );
       }
     }
