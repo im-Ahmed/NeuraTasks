@@ -58,7 +58,7 @@ const getAllBoard = asyncHandler(async (req, res, next) => {
         from: "users",
         localField: "members",
         foreignField: "_id",
-        as: "allMembers",
+        as: "members",
         pipeline: [
           {
             $project: {
@@ -74,7 +74,7 @@ const getAllBoard = asyncHandler(async (req, res, next) => {
       $project: {
         title: 1,
         description: 1,
-        allMembers: 1,
+        members: 1,
       },
     },
   ]);
@@ -98,17 +98,17 @@ const deleteBoard = asyncHandler(async (req, res, next) => {
 });
 const updateBoardDetails = asyncHandler(async (req, res, next) => {
   const { boardId } = req.params;
-  const { newTitle, newDescription } = req.body;
+  const { title, description } = req.body;
   // validate inputs
   ValidateId(boardId);
-  if ([newTitle, newDescription].some((field) => field.trim() === "")) {
+  if ([title, description].some((field) => field.trim() === "")) {
     throw new ApiError(400, "Details are missing");
   }
   const updatedBoard = await Board.findByIdAndUpdate(
     boardId,
     {
-      title: newTitle,
-      description: newDescription,
+      title: title,
+      description: description,
     },
     {
       new: true,

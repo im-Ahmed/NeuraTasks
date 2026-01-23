@@ -6,8 +6,18 @@ export type BoardMember = {
 };
 
 export type Board = {
-  _id: string;
+  _id?: string;
   title: string;
   description: string;
-  allMembers: BoardMember[];
+  members: BoardMember[] | string[];
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type CreateBoard = {
+  _id?: string;
+  title: string;
+  description: string;
+  userIds: string[];
 };
