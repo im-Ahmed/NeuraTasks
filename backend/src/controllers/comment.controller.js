@@ -2,14 +2,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Comment } from "../models/comment.model.js";
+import { ValidateId } from "../utils/ValidateId.js";
 import mongoose from "mongoose";
 
-const ValidateId = (ID) => {
-  if (!ID || ID?.length != 24) {
-    throw new ApiError(400, "Invalid Id's");
-  }
-};
-const addComment = asyncHandler(async (req, res, next) => {
+
+const addComment = asyncHandler(async (req, res, _) => {
   const { message, taskId } = req.body;
   const user = req.user;
   // Validate inputs
@@ -29,7 +26,7 @@ const addComment = asyncHandler(async (req, res, next) => {
     .status(200)
     .json(new ApiResponse(200, { comment }, "Comment added successfully"));
 });
-const deleteComment = asyncHandler(async (req, res, next) => {
+const deleteComment = asyncHandler(async (req, res, _) => {
   const { commentId } = req.params;
   ValidateId(commentId);
   try {
@@ -41,7 +38,7 @@ const deleteComment = asyncHandler(async (req, res, next) => {
     .status(200)
     .json(new ApiResponse(200, {}, "Comment is deleted successfully"));
 });
-const editComment = asyncHandler(async (req, res, next) => {
+const editComment = asyncHandler(async (req, res, _) => {
   const { newMessage } = req.body;
   const { commentId } = req.params;
   // Validate inputs
@@ -68,7 +65,7 @@ const editComment = asyncHandler(async (req, res, next) => {
       new ApiResponse(200, { editedComment }, "Comment is edited successfully")
     );
 });
-const allComments = asyncHandler(async (req, res, next) => {
+const allComments = asyncHandler(async (req, res, _) => {
   const { taskId } = req.params;
   ValidateId(taskId);
   const comments = await Comment.aggregate([

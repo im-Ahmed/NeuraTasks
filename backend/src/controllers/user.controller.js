@@ -22,7 +22,7 @@ const generateAccessAndRefreshToken = async (userId) => {
     );
   }
 };
-const registerUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler(async (req, res, _) => {
   const { name, username, email, password, role } = req.body;
   if (
     [name, username, email, password, role].some((field) => field.trim() === "")
@@ -58,13 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "User registered successfully"));
 });
-const loginUser = asyncHandler(async (req, res) => {
-  // get the login details
-  // check if the user exist in User collection
-  // verify the password
-  // generate access and refresh token
-  // save refresh token in DB
-  // send cookies & response
+const loginUser = asyncHandler(async (req, res, _) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
@@ -99,7 +93,7 @@ const loginUser = asyncHandler(async (req, res) => {
       )
     );
 });
-const logoutUser = asyncHandler(async (req, res) => {
+const logoutUser = asyncHandler(async (req, res, _) => {
   const userId = req.user._id;
   await User.findByIdAndUpdate(
     userId,
@@ -123,7 +117,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteUser = asyncHandler(async (req, res, _) => {
   const userId = req.user._id;
   const avatar = req.user.avatar;
   try {

@@ -3,13 +3,9 @@ import { Task } from "../models/task.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ValidateId } from "../utils/ValidateId.js";
 
-const ValidateId = (ID) => {
-  if (!ID || ID?.length != 24) {
-    throw new ApiError(400, "Invalid Id's");
-  }
-};
-const createTask = asyncHandler(async (req, res) => {
+const createTask = asyncHandler(async (req, res, _) => {
   const { title, description, boardId, userIds, priority, status, dueDate } =
     req.body;
   // validate inputs
@@ -55,7 +51,7 @@ const createTask = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, { task }, "Task created successfully"));
 });
-const deleteTask = asyncHandler(async (req, res) => {
+const deleteTask = asyncHandler(async (req, res, _) => {
   const { taskId } = req.params;
   ValidateId(taskId);
   try {
@@ -67,7 +63,7 @@ const deleteTask = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "task deleted successfully"));
 });
-const allTasks = asyncHandler(async (req, res) => {
+const allTasks = asyncHandler(async (req, res, _) => {
   const { boardId } = req.params;
   ValidateId(boardId);
   const tasks = await Task.aggregate([
@@ -98,7 +94,7 @@ const allTasks = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  
+
   if (!tasks) {
     throw new ApiError(500, "Failed to fetch all tasks");
   }
@@ -106,7 +102,7 @@ const allTasks = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, { tasks }, "Successfully fetched all tasks"));
 });
-const updateTaskDetails = asyncHandler(async (req, res) => {
+const updateTaskDetails = asyncHandler(async (req, res, _) => {
   const userId = req.user._id;
   const { taskId } = req.params;
   const { newPriority, newStatus, newDueDate } = req.body;
@@ -145,7 +141,7 @@ const updateTaskDetails = asyncHandler(async (req, res) => {
       new ApiResponse(200, { updatedTask }, "Successfully update task details")
     );
 });
-const getAllUserTasks = asyncHandler(async (req, res) => {
+const getAllUserTasks = asyncHandler(async (req, res, _) => {
   const userId = req.user._id;
   const userTasks = await Task.find({
     assignedTo: {

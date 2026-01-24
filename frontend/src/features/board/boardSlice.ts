@@ -2,8 +2,6 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { ApiResponse } from "@/types/generalTypes";
 import type { Board, CreateBoard } from "@/types/BoardTypes";
 
-type BoardResponse = ApiResponse<{ boards: Board[] }>;
-
 export const boardApi = createApi({
   reducerPath: "boardApi",
   baseQuery: fetchBaseQuery({
@@ -18,10 +16,6 @@ export const boardApi = createApi({
     // },
   }),
   endpoints: (build) => ({
-    // fetch all the boards for logged in user
-    getBoards: build.query<BoardResponse, void>({
-      query: () => "/",
-    }),
     // create new boards
     addBoard: build.mutation<ApiResponse<Board>, CreateBoard>({
       query: (formData) => ({
@@ -53,7 +47,5 @@ export const boardApi = createApi({
 export const {
   useDeleteBoardMutation,
   useAddBoardMutation,
-  useGetBoardsQuery,
-  useLazyGetBoardsQuery,
   useUpdateBoardMutation,
 } = boardApi;

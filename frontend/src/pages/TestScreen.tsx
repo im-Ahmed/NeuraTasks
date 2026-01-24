@@ -1,17 +1,15 @@
 import {
   useAddBoardMutation,
   useDeleteBoardMutation,
-  // useGetBoardsQuery,
-  useLazyGetBoardsQuery,
 } from "@/features/board/boardSlice";
+import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
 import type { Board } from "@/types/BoardTypes";
 import React, { useState } from "react";
 
 const TestScreen: React.FC = () => {
-  // const { data: allBoards, isLoading } = useGetBoardsQuery();
+  const { data: allBoards, isLoading } = useGetAllBoardQuery();
   const [addBoard, { isLoading: creatingBoard }] = useAddBoardMutation();
   const [deleteBoard, { isLoading: deleting }] = useDeleteBoardMutation();
-  const [fetchBoards, { data: allBoards, isLoading }] = useLazyGetBoardsQuery();
   const [deleteId, setDeleteId] = useState<string | undefined>("");
 
   const [formData, setFormData] = useState<{
@@ -81,12 +79,6 @@ const TestScreen: React.FC = () => {
         onClick={() => handleDelete(deleteId!)}
       >
         {deleting ? "deleting..." : "delete"}
-      </button>
-      <button
-        className="m-2 p-4 bg-green-600 text-white"
-        onClick={() => fetchBoards()}
-      >
-        {isLoading ? "fetching..." : "fetch"}
       </button>
     </div>
   );

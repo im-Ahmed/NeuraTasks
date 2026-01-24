@@ -2,18 +2,9 @@ import { Activity } from "../models/activity.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ValidateId } from "../utils/ValidateId.js";
 
-const ValidateId = (ID) => {
-  // Skip validation if the ID is not provided
-  if (!ID) return;
-
-  // Validate only when ID exists
-  if (typeof ID !== "string" || ID.length !== 24) {
-    throw new ApiError(400, "Invalid ID format");
-  }
-};
-
-const createActivity = asyncHandler(async (req, res) => {
+const createActivity = asyncHandler(async (req, res, _) => {
   const { action, board, task, details } = req.body;
   const userId = req.user._id;
   if (!action) {
@@ -37,7 +28,7 @@ const createActivity = asyncHandler(async (req, res) => {
       new ApiResponse(200, { activity }, "Successfully added to activity log")
     );
 });
-const getActivityLog = asyncHandler(async (req, res) => {
+const getActivityLog = asyncHandler(async ( res) => {
   const activityLog = await Activity.aggregate([
     {
       $lookup: {

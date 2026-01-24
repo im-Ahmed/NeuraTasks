@@ -5,7 +5,7 @@ import {
   deleteBoard,
   getAllBoard,
   updateBoardDetails,
-  updateBoardMembers,
+  
 } from "../controllers/board.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { handleTaskOnBoardDelete } from "../middlewares/handleBoardDelete.middleware.js";
@@ -19,5 +19,4 @@ router
   .route("/b/:boardId")
   .delete(handleTaskOnBoardDelete, deleteBoard)
   .patch(updateBoardDetails);
-router.route("/m/:boardId").patch(updateBoardMembers);
 export default router;
