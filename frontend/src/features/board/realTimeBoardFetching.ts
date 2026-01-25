@@ -10,7 +10,7 @@ type WSEvent =
   | { type: "BOARD_UPDATED"; board: Board }
   | { type: "BOARD_DELETED"; boardId: string };
 
-export const BoardFetching = createApi({
+export const boardFetching = createApi({
   reducerPath: "BoardFetching", // Good practice to name the reducer path
   baseQuery: fetchBaseQuery({ baseUrl: "/api/v1/boards" }),
   tagTypes: ["Boards"], // Optional: Useful if you want to force-refetch manually later
@@ -36,8 +36,13 @@ export const BoardFetching = createApi({
           const listener = (event: MessageEvent) => {
             const payload: WSEvent = JSON.parse(event.data);
 
+            // tiny type guard to avoid random WS garbage
+            if (!payload || !("type" in payload)) return;
+
             // 3. Optimistic Updates using Immer (RTK Query standard)
             updateCachedData((draft) => {
+              if (!draft.data) return;
+
               switch (payload.type) {
                 case "BOARD_CREATED":
                   // Check duplicates to prevent 'double add' on strict mode or bad network
@@ -79,4 +84,4 @@ export const BoardFetching = createApi({
   }),
 });
 
-export const { useGetAllBoardQuery } = BoardFetching;
+export const { useGetAllBoardQuery } = boardFetching;

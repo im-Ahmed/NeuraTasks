@@ -48,7 +48,7 @@ const TestScreen: React.FC = () => {
       {isLoading && <p>Loading...</p>}
       <h1>Test Screen</h1>
       {allBoards?.data.boards.map((board: Board) => (
-        <pre key={board._id}>{board.description}</pre>
+        <pre key={board._id}>{board.title}</pre>
       ))}
       <form className=" mt-32" onSubmit={handleSubmit}>
         <input
