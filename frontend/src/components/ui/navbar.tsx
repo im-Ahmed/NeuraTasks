@@ -5,8 +5,8 @@ const Navbar = () => {
   return (
     <div className="flex justify-between pr-4 lg:pr-8 items-center w-full h-20 ">
       <img src="/hero_logo.png" alt="logo" className="w-50 h-40" />
-      <Link to={"/signUp"}>
-        <Button variant={"secondary"}>sign up</Button>
+      <Link to="/signUp">
+        <Button variant={"secondary"} onClick={()=>{console.log("this is signup")}}>sign up</Button>
       </Link>
     </div>
   );
