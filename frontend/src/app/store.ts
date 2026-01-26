@@ -1,8 +1,9 @@
 import { boardApi } from "@/features/board/boardSlice";
 import { boardFetching } from "@/features/board/realTimeBoardFetching";
+import { commentApi } from "@/features/comments/commentSlice";
+import { commentFetching } from "@/features/comments/realTimeCommentFetching";
 import { logApi } from "@/features/log/logSlice";
 import { logFetching } from "@/features/log/realTimeLogFetching";
-import { taskFetching } from "@/features/task/realTimeTaskFetching";
 import { taskApi } from "@/features/task/taskSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
@@ -14,7 +15,8 @@ export const store = configureStore({
     [logApi.reducerPath]: logApi.reducer,
     [logFetching.reducerPath]: logFetching.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
-    [taskFetching.reducerPath]: taskFetching.reducer,
+    [commentApi.reducerPath]: commentApi.reducer,
+    [commentFetching.reducerPath]: commentFetching.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -23,5 +25,6 @@ export const store = configureStore({
       .concat(logApi.middleware)
       .concat(logFetching.middleware)
       .concat(taskApi.middleware)
-      .concat(taskFetching.middleware),
+      .concat(commentApi.middleware)
+      .concat(commentFetching.middleware),
 });
