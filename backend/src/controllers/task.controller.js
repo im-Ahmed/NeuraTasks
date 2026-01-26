@@ -4,10 +4,18 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ValidateId } from "../utils/ValidateId.js";
+import { broadcast } from "../utils/wsBroadCastor.js";
 
 const createTask = asyncHandler(async (req, res, _) => {
-  const { title, description, boardId, userIds, priority, status, dueDate } =
-    req.body;
+  const {
+    title,
+    description,
+    board: boardId,
+    assignedTo: userIds,
+    priority,
+    status,
+    dueDate,
+  } = req.body;
   // validate inputs
   if (
     [title, description, priority, status, dueDate].some(
@@ -46,7 +54,8 @@ const createTask = asyncHandler(async (req, res, _) => {
   if (!task) {
     throw new ApiError(500, "Failed or assign task");
   }
-
+  // notify assigned users about new task
+  broadcast({ type: "TASK_CREATED", task });
   return res
     .status(200)
     .json(new ApiResponse(200, { task }, "Task created successfully"));
@@ -56,6 +65,8 @@ const deleteTask = asyncHandler(async (req, res, _) => {
   ValidateId(taskId);
   try {
     await Task.findByIdAndDelete(taskId);
+    // notify all users about task deletion
+    broadcast({ type: "TASK_DELETED", taskId });
   } catch (err) {
     console.log(err || "Failed to delete task");
   }
@@ -77,7 +88,7 @@ const allTasks = asyncHandler(async (req, res, _) => {
         from: "users",
         localField: "assignedTo",
         foreignField: "_id",
-        as: "assignedMembers",
+        as: "assignedTo",
         pipeline: [
           {
             $project: {
@@ -86,11 +97,6 @@ const allTasks = asyncHandler(async (req, res, _) => {
             },
           },
         ],
-      },
-    },
-    {
-      $project: {
-        assignedTo: 0,
       },
     },
   ]);
@@ -105,11 +111,9 @@ const allTasks = asyncHandler(async (req, res, _) => {
 const updateTaskDetails = asyncHandler(async (req, res, _) => {
   const userId = req.user._id;
   const { taskId } = req.params;
-  const { newPriority, newStatus, newDueDate } = req.body;
+  const { priority, status, dueDate } = req.body;
   ValidateId(taskId);
-  if (
-    [newPriority, newStatus, newDueDate].some((field) => field.trim() === "")
-  ) {
+  if ([priority, status, dueDate].some((field) => field.trim() === "")) {
     throw new ApiError(400, "all field are required for updation");
   }
   // check whether the user try to update really belongs this task and then update
@@ -121,9 +125,9 @@ const updateTaskDetails = asyncHandler(async (req, res, _) => {
       },
     },
     {
-      priority: newPriority,
-      status: newStatus,
-      dueDate: newDueDate,
+      priority,
+      status,
+      dueDate,
     },
     {
       new: true,
@@ -135,6 +139,8 @@ const updateTaskDetails = asyncHandler(async (req, res, _) => {
       "Failed to update might be the user is not autherized to update task"
     );
   }
+  // notify all assigned users about task update
+  broadcast({ type: "TASK_UPDATED", updatedTask });
   return res
     .status(200)
     .json(
