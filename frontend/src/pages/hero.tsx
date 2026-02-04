@@ -23,23 +23,6 @@ const itemVariants : Variants = {
   },
 };
 
-const containerVariants : Variants  = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2 },
-  },
-};
-
-const itemVariants : Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: "easeOut" },
-  },
-};
-
 const Hero = () => {
   return (
     <div className="relative bg-neutral-900 text-white w-screen h-screen overflow-hidden">
