@@ -1,12 +1,11 @@
 import { motion, type Variants } from "framer-motion";
 import SubHeading from "@/components/ui/subHeading";
-import  Navbar from "../components/ui/navbar";
+import Navbar from "../components/ui/navbar";
 import H1 from "@/components/ui/mainHeading";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import type React from "react";
 
-const containerVariants : Variants  = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -14,7 +13,7 @@ const containerVariants : Variants  = {
   },
 };
 
-const itemVariants : Variants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
@@ -53,7 +52,7 @@ const Hero = () => {
             className="flex flex-col sm:flex-row gap-5 mt-4"
           >
             <Link to="/signUp">
-              <Button size="lg" className="min-w-[180px]" >
+              <Button size="lg" className="min-w-[180px]">
                 Get Started
               </Button>
             </Link>
@@ -86,7 +85,8 @@ const GlowBackground = () => {
           style={{
             width: `${300 + i * 40}px`,
             height: `${300 + i * 40}px`,
-            background: "radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%)",
             top: `${Math.random() * 80}%`,
             left: `${Math.random() * 80}%`,
           }}
