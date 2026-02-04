@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog"; // shadcn/ui Dialog
 import { cn } from "@/lib/utils";
 import CreateBoard from "../components/createBoard";
+import ActionMenuRecommended from "../components/actionBtn"
 
 // Define Board Item Type
 interface BoardItem {
@@ -88,6 +89,29 @@ export default function Board() {
     setSelectedItem(newBoard);
     setIsCreateModalOpen(false);
   };
+  const handleDeleteBoard = (id: string) => {
+  setSidebarItems(prev => prev.filter(b => b.id !== id));
+  if (selectedItem?.id === id) setSelectedItem(null);
+};
+const handleUpdateBoard = (id: string) => {
+  const board = sidebarItems.find(b => b.id === id);
+  alert("Update board: " + board?.title);
+  // open edit dialog later
+};
+const handleDuplicateBoard = (id: string) => {
+  const board = sidebarItems.find(b => b.id === id);
+  if (!board) return;
+
+  const copy = {
+    ...board,
+    id: "board-" + Date.now(),
+    title: board.title + " Copy",
+  };
+
+  setSidebarItems(prev => [...prev, copy]);
+};
+
+
 
   return (
     <div className="min-h-screen bg-[#0a0f1a] grid grid-rows-[auto_1fr_auto] text-white">
@@ -102,11 +126,13 @@ export default function Board() {
                   Create Board
                 </Button>
               </DialogTrigger>
-              <button className="p-2 rounded-lg bg-[#1a1f2e] hover:bg-[#2a3349] transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+            <ActionMenuRecommended
+  selectedBoard={selectedItem}
+  onDelete={handleDeleteBoard}
+  onDuplicate={handleDuplicateBoard}
+  onUpdate={handleUpdateBoard}
+/>
+
           <button className="p-2 rounded-lg bg-[#1a1f2e] hover:bg-[#2a3349] transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

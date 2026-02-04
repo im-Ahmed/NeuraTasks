@@ -72,97 +72,139 @@ export default function CreateBoard({ onSuccess, onCancel, availableUsers }: Cre
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 flex flex-col gap-6">
-      {/* Board Name */}
-      <div className="grid grid-cols-2 gap-4">
-      <div >
-        <Label htmlFor="boardName">Board Name</Label>
-        <Input id="boardName" {...register("boardName")} className="mt-1" />
-        {errors.boardName && (
-          <p className="text-destructive text-sm mt-1">{errors.boardName.message}</p>
-        )}
-      </div>
-
-      {/* Title */}
-      <div>
-        <Label htmlFor="title">Title</Label>
-        <Input id="title" {...register("title")} className="mt-1" />
-        {errors.title && (
-          <p className="text-destructive text-sm mt-1">{errors.title.message}</p>
-        )}
-      </div>
-      </div>
-
-      
-      <div className="grid grid-cols-2 gap-4">
-
-        {/* Owner */}
-      <div>
-        <Label htmlFor="owner">Owner</Label>
-        <Input id="owner" {...register("owner")} className="mt-1" />
-        {errors.owner && (
-          <p className="text-destructive text-sm mt-1">{errors.owner.message}</p>
-        )}
-      </div>
-      {/* Description */}
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" {...register("description")} className="mt-1" />
-        {errors.description && (
-          <p className="text-destructive text-sm mt-1">{errors.description.message}</p>
-        )}
-      </div>
-
-      
+   <form
+  onSubmit={handleSubmit(onSubmit)}
+  className="w-full max-w-4xl mx-auto flex flex-col gap-5 sm:gap-6 lg:gap-8 px-3 sm:px-4 lg:px-6 overflow-x-hidden"
+>
+  {/* Row 1 */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+    {/* Board Name */}
+    <div className="min-w-0">
+      <Label htmlFor="boardName" className="text-sm sm:text-base">Board Name</Label>
+      <Input
+        id="boardName"
+        {...register("boardName")}
+        className="mt-2 h-10 sm:h-11 w-full"
+      />
+      {errors.boardName && (
+        <p className="text-destructive text-xs sm:text-sm mt-1 break-words">
+          {errors.boardName.message}
+        </p>
+      )}
     </div>
-      {/* Members Selection */}
-      <div className="flex flex-col justify-center">
-        <Label>Members</Label>
-        <div className="mt-2 border border-border rounded-md overflow-hidden max-h-60 overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]"></TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>id</TableHead>
-                <TableHead>Identifier</TableHead>
-                <TableHead>Role</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {availableUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedMembers.includes(user.id)}
-                      onCheckedChange={() => toggleMember(user.id)}
-                    />
-                  </TableCell>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.id}</TableCell>
-                  <TableCell>{user.Mail}</TableCell>
-                  <TableCell>{user.Role}</TableCell>
-                  
 
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {availableUsers.length === 0 && (
-          <p className="text-muted-foreground text-sm mt-2">No users available to add.</p>
-        )}
-      </div>
+    {/* Title */}
+    <div className="min-w-0">
+      <Label htmlFor="title" className="text-sm sm:text-base">Title</Label>
+      <Input
+        id="title"
+        {...register("title")}
+        className="mt-2 h-10 sm:h-11 w-full"
+      />
+      {errors.title && (
+        <p className="text-destructive text-xs sm:text-sm mt-1 break-words">
+          {errors.title.message}
+        </p>
+      )}
+    </div>
+  </div>
 
-      {/* Actions */}
-      <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" className="text-black" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Board"}
-        </Button>
-      </div>
-    </form>
-  );
+  {/* Row 2 */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+    {/* Owner */}
+    <div className="min-w-0">
+      <Label htmlFor="owner" className="text-sm sm:text-base">Owner</Label>
+      <Input
+        id="owner"
+        {...register("owner")}
+        className="mt-2 h-10 sm:h-11 w-full"
+      />
+      {errors.owner && (
+        <p className="text-destructive text-xs sm:text-sm mt-1 break-words">
+          {errors.owner.message}
+        </p>
+      )}
+    </div>
+
+    {/* Description */}
+    <div className="min-w-0">
+      <Label htmlFor="description" className="text-sm sm:text-base">Description</Label>
+      <Textarea
+        id="description"
+        {...register("description")}
+        className="mt-2 min-h-[100px] sm:min-h-[120px] w-full resize-y"
+      />
+      {errors.description && (
+        <p className="text-destructive text-xs sm:text-sm mt-1 break-words">
+          {errors.description.message}
+        </p>
+      )}
+    </div>
+  </div>
+
+  {/* Members Selection */}
+  <div className="flex flex-col">
+    <Label className="text-sm sm:text-base">Members</Label>
+
+    <div className="mt-3 border border-border rounded-md overflow-x-auto max-h-64">
+      <Table className="min-w-[640px] text-xs sm:text-sm">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12"></TableHead>
+            <TableHead className="whitespace-nowrap">Name</TableHead>
+            <TableHead className="whitespace-nowrap">ID</TableHead>
+            <TableHead className="whitespace-nowrap">Identifier</TableHead>
+            <TableHead className="whitespace-nowrap">Role</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {availableUsers.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell>
+                <Checkbox
+                  checked={selectedMembers.includes(user.id)}
+                  onCheckedChange={() => toggleMember(user.id)}
+                />
+              </TableCell>
+              <TableCell className="truncate max-w-[140px] sm:max-w-none">
+                {user.name}
+              </TableCell>
+              <TableCell className="truncate">{user.id}</TableCell>
+              <TableCell className="truncate">{user.Mail}</TableCell>
+              <TableCell className="truncate">{user.Role}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+
+    {availableUsers.length === 0 && (
+      <p className="text-muted-foreground text-xs sm:text-sm mt-2">
+        No users available to add.
+      </p>
+    )}
+  </div>
+
+  {/* Actions */}
+  <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4 pt-2">
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full sm:w-auto h-10 sm:h-11 text-black"
+      onClick={onCancel}
+      disabled={isSubmitting}
+    >
+      Cancel
+    </Button>
+
+    <Button
+      type="submit"
+      className="w-full sm:w-auto h-10 sm:h-11"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? "Creating..." : "Create Board"}
+    </Button>
+  </div>
+</form>
+  )
 }

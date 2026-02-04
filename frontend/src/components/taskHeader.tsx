@@ -1,8 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { LayoutGrid, Plus, Search, Settings } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import TaskActionMenu from '../components/taskActionMenu';
+import type { TaskItem } from '../components/taskBody';
+
 import {
   Select,
   SelectContent,
@@ -21,22 +24,31 @@ interface Props {
   selectedBoard: string;
   onBoardChange: (id: string) => void;
   onAssignClick: () => void;
-}
 
+  // ✅ new props
+  selectedTask: TaskItem | null;
+  onDeleteTask: (id: string) => void;
+  onDuplicateTask: (id: string) => void;
+  onUpdateTask: (id: string) => void;
+}
 export function TaskHeader({
-  boards,
+   boards,
   selectedBoard,
   onBoardChange,
   onAssignClick,
+  selectedTask,
+  onDeleteTask,
+  onDuplicateTask,
+  onUpdateTask,
 }: Props) {
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className=" top-0  border-none bg-white"
+      className="top-0 border-none bg-white w-full overflow-x-hidden"
     >
-      <div className="flex h-20 items-center justify-between p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-3 sm:px-6 py-4 sm:h-20">
         {/* left */}
         <motion.div
           initial={{ opacity: 0, x: -10 }}
@@ -44,7 +56,9 @@ export function TaskHeader({
           transition={{ delay: 0.3 }}
           className="flex items-center gap-2 font-semibold text-indigo-600"
         >
-          <span className="text-3xl font-bold">Tasks</span>
+          <span className="text-xl sm:text-2xl lg:text-3xl font-bold">
+            Tasks
+          </span>
         </motion.div>
 
         {/* right */}
@@ -52,11 +66,11 @@ export function TaskHeader({
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="flex items-center gap-3 mr-1"
+          className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto"
         >
           {/* Board Select */}
           <Select value={selectedBoard} onValueChange={onBoardChange}>
-            <SelectTrigger className="w-40  px-4 py-2 rounded-lg font-medium transition-colors border-indigo-200 bg-white text-indigo-700 focus:ring-indigo-500">
+            <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-lg font-medium border-indigo-200 bg-white text-indigo-700 focus:ring-indigo-500">
               <SelectValue placeholder="Select Board" />
             </SelectTrigger>
             <SelectContent className="border-indigo-100">
@@ -72,38 +86,49 @@ export function TaskHeader({
             </SelectContent>
           </Select>
 
-          {/* Assign Task */}
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              onClick={onAssignClick}
-              className="gap-1.5 px-4 py-2 rounded-lg font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
+          {/* Assign + Search + Settings — same line on mobile */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Assign Task — 50% width mobile */}
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="w-1/2 sm:w-auto"
             >
-              <Plus className="h-4 w-4" />
-              Assign Task
-            </Button>
-          </motion.div>
+              <Button
+                onClick={onAssignClick}
+                className="w-full sm:w-auto justify-center gap-2 px-3 sm:px-4 h-10 sm:h-11 rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
+                <span className=" sm:inline">Assign Task</span>
+              </Button>
+            </motion.div>
 
-          {/* Search */}
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              size="icon"
-              variant="ghost"
-              className=" text-indigo-600 hover:bg-indigo-50"
+            {/* Search */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95  }}
+              className="flex-1 sm:flex-none"
             >
-              <Search className="h-5 w-5" />
-            </Button>
-          </motion.div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-10 w-full sm:w-10 text-indigo-600 hover:bg-indigo-50"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+            </motion.div>
 
-          {/* Settings */}
-          <motion.div whileHover={{ rotate: 90 }} transition={{ duration: 0.3 }}>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="text-indigo-600 hover:bg-indigo-50"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-          </motion.div>
+            {/* Settings */}
+             <div className="flex-1 justify-end">
+          <TaskActionMenu
+            selectedTask={selectedTask}
+            onDelete={onDeleteTask}
+            onDuplicate={onDuplicateTask}
+            onUpdate={onUpdateTask}
+          />
+
+        </div>
+          </div>
         </motion.div>
       </div>
     </motion.header>

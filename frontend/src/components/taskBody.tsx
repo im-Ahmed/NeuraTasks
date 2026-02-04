@@ -141,7 +141,7 @@ export function TaskBody({
             <div className="p-3 border-t flex gap-2">
               <Input
                 placeholder="Message..."
-                className="focus:ring-indigo-500"
+                className="focus:ring-indigo-500 text-indigo-500"
               />
               <Button size="icon" className="bg-indigo-600 hover:bg-indigo-700 text-white">
                 →

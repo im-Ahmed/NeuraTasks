@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 
 import { TaskHeader } from '../components/taskHeader';
@@ -20,11 +20,50 @@ export default function Task() {
   const [openDialog, setOpenDialog] = useState(false);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
+  // ✅ tasks stored per board
   const [tasks, setTasks] = useState<Record<string, TaskItem[]>>({
     frontend: [],
     backend: [],
     design: [],
   });
+
+  // ✅ always safe array
+const boardTasks = tasks[selectedBoard] ?? [];
+  // ✅ safe selected task lookup (fixes undefined.find error class of bugs)
+  const activeTask = useMemo(
+    () => boardTasks.find((t) => t.id === activeTaskId) ?? null,
+    [boardTasks, activeTaskId]
+  );
+
+  const handleDeleteTask = (id: string) => {
+    setTasks((prev) => ({
+      ...prev,
+      [selectedBoard]: prev[selectedBoard].filter((t) => t.id !== id),
+    }));
+
+    if (activeTaskId === id) setActiveTaskId(null);
+  };
+
+  const handleDuplicateTask = (id: string) => {
+    const t = boardTasks.find((x) => x.id === id);
+    if (!t) return;
+
+    const copy: TaskItem = {
+      ...t,
+      id: 'task-' + Date.now(),
+      title: t.title + ' Copy',
+    };
+
+    setTasks((prev) => ({
+      ...prev,
+      [selectedBoard]: [...prev[selectedBoard], copy],
+    }));
+  };
+
+  const handleUpdateTask = (id: string) => {
+    // plug your update dialog here
+    alert('Open update dialog for task ' + id);
+  };
 
   const handleCreateTask = (data: AssignTaskValues) => {
     const newTask: TaskItem = {
@@ -41,7 +80,7 @@ export default function Task() {
       [selectedBoard]: [...prev[selectedBoard], newTask],
     }));
 
-    setActiveTaskId(newTask.id); // auto-select new task
+    setActiveTaskId(newTask.id);
   };
 
   return (
@@ -52,17 +91,25 @@ export default function Task() {
       className="min-h-screen flex flex-col bg-white"
     >
       {/* Header */}
-      <TaskHeader
-        boards={boards}
-        selectedBoard={selectedBoard}
-        onBoardChange={setSelectedBoard}
-        onAssignClick={() => setOpenDialog(true)}
-      />
+     <TaskHeader
+  boards={boards}
+  selectedBoard={selectedBoard}
+  onBoardChange={setSelectedBoard}
+  onAssignClick={() => setOpenDialog(true)}
+
+  selectedTask={activeTask}
+  onDeleteTask={handleDeleteTask}
+  onDuplicateTask={handleDuplicateTask}
+  onUpdateTask={handleUpdateTask}
+/>
 
       {/* Body */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 space-y-4">
+        {/* ✅ Task Action Menu — uses selected task */}
+       
+
         <TaskBody
-          tasks={tasks[selectedBoard]}
+          tasks={boardTasks}
           activeTaskId={activeTaskId}
           onTaskSelect={setActiveTaskId}
           onAssignClick={() => setOpenDialog(true)}
