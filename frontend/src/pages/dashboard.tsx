@@ -1,7 +1,5 @@
-import type React from "react";
+ const Dashboard = () =>{
+  return <h1>hello</h1>
+}
 
-const Dashboard: React.FC = () => {
-  return <div className=""></div>;
-};
-
-export default Dashboard;
+export default Dashboard

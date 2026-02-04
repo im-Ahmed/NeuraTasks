@@ -159,7 +159,7 @@ function Sidebar({
   children,
   ...props
 }: React.ComponentProps<"div"> & {
-  side?: "left" | "right";
+  side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
 }) {
@@ -258,7 +258,7 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar();
+  // const { toggleSidebar } = useSidebar();
 
   return (
     <Button
@@ -269,7 +269,7 @@ function SidebarTrigger({
       className={cn("size-7 fixed", className)}
       onClick={(event) => {
         onClick?.(event);
-        toggleSidebar();
+        // toggleSidebar();
       }}
       {...props}
     >
