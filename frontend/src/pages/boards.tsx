@@ -89,16 +89,7 @@ export default function Board() {
     setSelectedItem(newBoard);
     setIsCreateModalOpen(false);
   };
-  const handleDeleteBoard = (id: string) => {
-  setSidebarItems(prev => prev.filter(b => b.id !== id));
-  if (selectedItem?.id === id) setSelectedItem(null);
-};
-const handleUpdateBoard = (id: string) => {
-  const board = sidebarItems.find(b => b.id === id);
-  alert("Update board: " + board?.title);
-  // open edit dialog later
-};
-const handleDuplicateBoard = (id: string) => {
+  const handleDuplicateBoard = (id: string) => {
   const board = sidebarItems.find(b => b.id === id);
   if (!board) return;
 
@@ -110,7 +101,15 @@ const handleDuplicateBoard = (id: string) => {
 
   setSidebarItems(prev => [...prev, copy]);
 };
-
+const handleDeleteBoard = (id: string) => {
+  setSidebarItems(prev => prev.filter(b => b.id !== id));
+  if (selectedItem?.id === id) setSelectedItem(null);
+};
+const handleUpdateBoard = (id: string) => {
+  const board = sidebarItems.find(b => b.id === id);
+  alert("Update board: " + board?.title);
+  // open edit dialog later
+};
 
 
   return (
@@ -126,12 +125,11 @@ const handleDuplicateBoard = (id: string) => {
                   Create Board
                 </Button>
               </DialogTrigger>
-            <ActionMenuRecommended
-  selectedBoard={selectedItem}
-  onDelete={handleDeleteBoard}
-  onDuplicate={handleDuplicateBoard}
-  onUpdate={handleUpdateBoard}
-/>
+               <button className="p-2 rounded-lg bg-[#1a1f2e] hover:bg-[#2a3349] transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
 
           <button className="p-2 rounded-lg bg-[#1a1f2e] hover:bg-[#2a3349] transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,16 +199,29 @@ const handleDuplicateBoard = (id: string) => {
                     )}
                   >
                     <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">{item.icon}</span>
-                        <div>
-                          <CardTitle>{item.title}</CardTitle>
-                          <CardDescription className="text-[#dce0ebe0]">
-                            {item.description}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
+                   <div className="flex items-start justify-between gap-3">
+                     {/* Left: Icon */}
+                     <span className="text-3xl">{item.icon}</span>
+
+                     <div className="flex-1 flex flex-col">
+                       <div className="flex items-center justify-between">
+                         <CardTitle className="text-lg md:text-xl">{item.title}</CardTitle>
+                         {selectedItem?.id === item.id && (
+                           <ActionMenuRecommended
+                             selectedBoard={selectedItem}
+                             onDelete={handleDeleteBoard}
+                             onDuplicate={handleDuplicateBoard}
+                             onUpdate={handleUpdateBoard}
+                           />
+                         )}
+                       </div>
+                       <CardDescription className="text-[#dce0ebe0] mt-1">
+                         {item.description}
+                       </CardDescription>
+                     </div>
+                   </div>
+                  </CardHeader>
+
                     <CardFooter className="justify-end">
                       <span className="text-sm text-muted-foreground">
                         {selectedItem?.id === item.id ? "Selected" : "Select →"}

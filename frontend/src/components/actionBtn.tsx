@@ -14,9 +14,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { motion } from 'framer-motion';
 
 import { useState } from "react";
-import { Trash2, Pencil, Copy } from "lucide-react";
+import { EllipsisVertical, Trash2, Pencil, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -40,11 +41,19 @@ export default function ActionMenuRecommended({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-2 rounded-lg bg-[#1a1f2e] hover:bg-[#2a3349] transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+         <motion.div
+              // whileHover={{ rotate: 90 }}
+              // transition={{ duration: 0.2 }}
+              className="bg-none hover:bg-none"
+            >
+              <Button
+                size="icon"
+               variant={null}
+                className="h-10 w-full sm:w-10 text-white bg-gray"
+              >
+                <EllipsisVertical className="bg-none hover:bg-none" />
+              </Button>
+            </motion.div>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg">
@@ -82,7 +91,6 @@ export default function ActionMenuRecommended({
         </DropdownMenuContent>
       </DropdownMenu>
 
-          <DropdownMenuSeparator />
       {/* ✅ Delete Confirm Dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>

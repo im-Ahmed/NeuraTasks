@@ -20,7 +20,7 @@ import {
 import { motion } from 'framer-motion';
 
 import { Button } from "@/components/ui/button";
-import {Settings , Trash2, Pencil, Copy } from "lucide-react";
+import { EllipsisVertical, Trash2, Pencil, Copy } from "lucide-react";
 
 interface TaskLite {
   id: string;
@@ -48,16 +48,16 @@ export default function TaskActionMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <motion.div
-              whileHover={{ rotate: 180 }}
-              transition={{ duration: 0.1 }}
-              className="flex-1 sm:flex-none"
+              // whileHover={{ rotate: 90 }}
+              // transition={{ duration: 0.2 }}
+              // className="flex-1 sm:flex-none"
             >
               <Button
                 size="icon"
                 variant="ghost"
                 className="h-10 w-full sm:w-10 text-indigo-600 hover:bg-indigo-50"
               >
-                <Settings className="h-5 w-5" />
+                <EllipsisVertical />
               </Button>
             </motion.div>
         </DropdownMenuTrigger>

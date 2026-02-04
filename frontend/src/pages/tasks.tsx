@@ -96,11 +96,6 @@ const boardTasks = tasks[selectedBoard] ?? [];
   selectedBoard={selectedBoard}
   onBoardChange={setSelectedBoard}
   onAssignClick={() => setOpenDialog(true)}
-
-  selectedTask={activeTask}
-  onDeleteTask={handleDeleteTask}
-  onDuplicateTask={handleDuplicateTask}
-  onUpdateTask={handleUpdateTask}
 />
 
       {/* Body */}
@@ -108,12 +103,16 @@ const boardTasks = tasks[selectedBoard] ?? [];
         {/* ✅ Task Action Menu — uses selected task */}
        
 
-        <TaskBody
-          tasks={boardTasks}
-          activeTaskId={activeTaskId}
-          onTaskSelect={setActiveTaskId}
-          onAssignClick={() => setOpenDialog(true)}
-        />
+       <TaskBody
+  tasks={tasks[selectedBoard]}
+  activeTaskId={activeTaskId}
+  onTaskSelect={setActiveTaskId}
+  onAssignClick={() => setOpenDialog(true)}
+  onDeleteTask={handleDeleteTask}
+  onDuplicateTask={handleDuplicateTask}
+  onUpdateTask={handleUpdateTask}
+/>
+
       </main>
 
       {/* Assign Task Dialog */}

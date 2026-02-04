@@ -1,11 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import TaskActionMenu from '../components/taskActionMenu';
-import type { TaskItem } from '../components/taskBody';
-
 import {
   Select,
   SelectContent,
@@ -24,22 +21,12 @@ interface Props {
   selectedBoard: string;
   onBoardChange: (id: string) => void;
   onAssignClick: () => void;
-
-  // ✅ new props
-  selectedTask: TaskItem | null;
-  onDeleteTask: (id: string) => void;
-  onDuplicateTask: (id: string) => void;
-  onUpdateTask: (id: string) => void;
 }
 export function TaskHeader({
    boards,
   selectedBoard,
   onBoardChange,
   onAssignClick,
-  selectedTask,
-  onDeleteTask,
-  onDuplicateTask,
-  onUpdateTask,
 }: Props) {
   return (
     <motion.header
@@ -120,12 +107,20 @@ export function TaskHeader({
 
             {/* Settings */}
              <div className="flex-1 justify-end">
-          <TaskActionMenu
-            selectedTask={selectedTask}
-            onDelete={onDeleteTask}
-            onDuplicate={onDuplicateTask}
-            onUpdate={onUpdateTask}
-          />
+              <motion.div
+              whileHover={{ rotate: 180 }}
+              transition={{ duration: 0.2 }}
+              className="flex-1 sm:flex-none"
+            >
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-10 w-full sm:w-10 text-indigo-600 hover:bg-indigo-50"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </motion.div>
+
 
         </div>
           </div>
