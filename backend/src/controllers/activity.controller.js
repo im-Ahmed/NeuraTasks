@@ -2,18 +2,10 @@ import { Activity } from "../models/activity.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ValidateId } from "../utils/ValidateId.js";
+import { broadcast } from "../utils/wsBroadCastor.js";
 
-const ValidateId = (ID) => {
-  // Skip validation if the ID is not provided
-  if (!ID) return;
-
-  // Validate only when ID exists
-  if (typeof ID !== "string" || ID.length !== 24) {
-    throw new ApiError(400, "Invalid ID format");
-  }
-};
-
-const createActivity = asyncHandler(async (req, res) => {
+const createActivity = asyncHandler(async (req, res, _) => {
   const { action, board, task, details } = req.body;
   const userId = req.user._id;
   if (!action) {
@@ -31,24 +23,27 @@ const createActivity = asyncHandler(async (req, res) => {
   if (!activity) {
     throw new ApiError(500, "Failed to track activity");
   }
+  // notify all connected clients about the new activity
+  broadcast({ type: "LOG_ADD", activity });
   return res
     .status(200)
     .json(
       new ApiResponse(200, { activity }, "Successfully added to activity log")
     );
 });
-const getActivityLog = asyncHandler(async (req, res) => {
-  const activityLog = await Activity.aggregate([
+const getActivityLog = asyncHandler(async (req, res, _) => {
+  const activity = await Activity.aggregate([
     {
       $lookup: {
         from: "tasks",
         localField: "task",
         foreignField: "_id",
-        as: "taskName",
+        as: "task",
         pipeline: [
           {
             $project: {
               title: 1,
+              _id: -1,
             },
           },
         ],
@@ -59,11 +54,12 @@ const getActivityLog = asyncHandler(async (req, res) => {
         from: "boards",
         localField: "board",
         foreignField: "_id",
-        as: "boardName",
+        as: "board",
         pipeline: [
           {
             $project: {
               title: 1,
+              _id: -1,
             },
           },
         ],
@@ -74,11 +70,12 @@ const getActivityLog = asyncHandler(async (req, res) => {
         from: "users",
         localField: "user",
         foreignField: "_id",
-        as: "actor",
+        as: "user",
         pipeline: [
           {
             $project: {
               username: 1,
+              _id: -1,
             },
           },
         ],
@@ -88,25 +85,26 @@ const getActivityLog = asyncHandler(async (req, res) => {
       $project: {
         action: 1,
         details: 1,
-        actor: 1,
-        taskName: 1,
-        boardName: 1,
+        task: { $arrayElemAt: ["$task.title", 0] },
+        board: { $arrayElemAt: ["$board.title", 0] },
+        user: { $arrayElemAt: ["$user.username", 0] },
       },
     },
   ]);
-  // const activityLog = await Activity.find({});
-  if (!activityLog) {
+  if (!activity) {
     throw new ApiError(200, "Failed to fetch activiy log");
   }
   return res
     .status(200)
     .json(
-      new ApiResponse(200, { activityLog }, "Activity log fetched successfully")
+      new ApiResponse(200, { activity }, "Activity log fetched successfully")
     );
 });
 const clearLog = asyncHandler(async (req, res) => {
   try {
     await Activity.deleteMany({});
+    // notify all connected clients about the cleared log
+    broadcast({ type: "LOG_CLEAR" });
   } catch (err) {
     throw new ApiError(500, err || "Failed to clear log");
   }

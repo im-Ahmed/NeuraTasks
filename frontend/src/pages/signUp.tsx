@@ -231,7 +231,7 @@ import { PiCameraPlus } from "react-icons/pi";
 import AuthLeft from "@/components/ui/authLeft";
 import { ButtonLoading } from "@/components/ui/loadingButton";
 
-const SignUp = () => {
+const SignUp :React.FC = () => {
   const name = useRef<HTMLInputElement>(null);
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);

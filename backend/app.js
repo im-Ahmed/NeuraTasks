@@ -1,4 +1,6 @@
+import http from "http";
 import express from "express";
+import { WebSocketServer } from "ws";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { LIMIT } from "./constants.js";
@@ -29,6 +31,14 @@ app.use(
 );
 // handle cookies
 app.use(cookieParser());
+// setup websocket server
+const server = http.createServer(app);
+export const wss = new WebSocketServer({ server });
+// check the ws server status
+wss.on("connection", () => {
+  console.log("Client connected");
+});
+
 // Import routers
 import userRouter from "./src/routes/user.route.js";
 import boardRouter from "./src/routes/board.route.js";
@@ -43,4 +53,4 @@ app.use("/api/v1/tasks", taskRouter);
 app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/activities", activityRouter);
 
-export { app };
+export { server };

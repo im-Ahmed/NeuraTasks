@@ -13,7 +13,18 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": "http://localhost:8000",
+      // 1. Handle normal API requests (HTTP)
+      "/api": {
+        target: "http://localhost:8000", // Must be http://
+        changeOrigin: true,
+        secure: false,
+      },
+      // // 2. Handle WebSocket connection (Optional, since you connect directly in your code)
+      // // If you were using a proxy for WS, it would look like this:
+      // "/socket": {
+      //   target: "ws://localhost:8000",
+      //   ws: true,
+      // },
     },
   },
 });

@@ -145,12 +145,12 @@ const Login = () => {
         password: password.current?.value || "",
       });
       setLoading(false);
-      alert(response.data.message);
+      localStorage.setItem("accessToken", response.data.data.accessToken);
     } catch (err: any) {
       setLoading(false);
       if (axios.isAxiosError(err)) {
         alert(
-          err.response?.data.message || err.message || "something went wrong"
+          err.response?.data.message || err.message || "something went wrong",
         );
       }
     }
@@ -191,7 +191,7 @@ const Login = () => {
               <CardTitle className="text-3xl font-bold text-black tracking-tight">
                 Welcome back
               </CardTitle>
-              <CardDescription className="text-gray-400 text-[#161516]">
+              <CardDescription className=" text-[#161516]">
                 Sign in to continue to your workspace
               </CardDescription>
             </CardHeader>
@@ -206,37 +206,40 @@ const Login = () => {
               >
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-200 font-medium text-black">
+                  <Label htmlFor="email" className=" font-medium text-black">
                     Email address
                   </Label>
                   <Input
-                      ref={email}
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                      className="h-11 mt-1"
-                    />
+                    ref={email}
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    className="h-11 mt-1"
+                  />
                 </div>
 
                 {/* Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-200 font-medium  text-black">
+                  <Label
+                    htmlFor="password"
+                    className=" font-medium  text-black"
+                  >
                     Password
                   </Label>
                   <Input
-                      ref={email}
-                      id="password"
-                      type="password"                     
-                      required
-                      className="h-11 mt-1"
-                    />
+                    ref={email}
+                    id="password"
+                    type="password"
+                    required
+                    className="h-11 mt-1"
+                  />
                 </div>
 
                 {/* Submit Button */}
                 <div className="pt-4">
                   {loading ? (
-                    <ButtonLoading  />
+                    <ButtonLoading />
                   ) : (
                     <Button
                       type="submit"

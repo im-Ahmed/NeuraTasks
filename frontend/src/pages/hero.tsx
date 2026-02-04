@@ -4,6 +4,24 @@ import  Navbar from "../components/ui/navbar";
 import H1 from "@/components/ui/mainHeading";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import type React from "react";
+
+const containerVariants : Variants  = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2 },
+  },
+};
+
+const itemVariants : Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
+};
 
 const containerVariants : Variants  = {
   hidden: { opacity: 0 },
