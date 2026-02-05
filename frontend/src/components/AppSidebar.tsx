@@ -31,8 +31,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useLogoutUserMutation } from "@/features/user/userSlice";
+import { toast } from "sonner";
 
 const items = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -45,34 +47,50 @@ const items = [
 ];
 
 export function AppSidebar() {
- const { state, toggleSidebar, isMobile } = useSidebar();
-const isCollapsed = state === "collapsed";
+  const { state, toggleSidebar, isMobile } = useSidebar();
+  const navigate = useNavigate();
+  const [logoutUser, { isLoading: logoutLoading }] = useLogoutUserMutation();
+
+  const isCollapsed = state === "collapsed";
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser().unwrap();
+      toast.success("Logged out successfully");
+      navigate("/login", { replace: true });
+    } catch (err: any) {
+      const errorMessage =
+        err?.data?.message || "Failed to logout. Please try again.";
+      toast.error(errorMessage);
+      console.error("Logout error:", err);
+    }
+  };
 
   return (
     <>
       {/* Mobile-only: Left edge persistent arrow */}
-     {isMobile && (
-  <button
-    onClick={() => {
-      console.log("toggle click");
-      toggleSidebar();
-    }}
-    aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
-    className="
+      {isMobile && (
+        <button
+          onClick={() => {
+            console.log("toggle click");
+            toggleSidebar();
+          }}
+          aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
+          className="
       fixed right-0 top-1/2 -translate-y-1/2
       z-[100]
       p-1 bg-gray-400
       text-gray-700 hover:text-black
       transition
     "
-  >
-   {isCollapsed ? (
-              <ChevronRight className="h-5 w-5" />
-            ) : (
-              <ChevronLeft className="h-5 w-5" />
-            )}
-  </button>
-)}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-5 w-5" />
+          ) : (
+            <ChevronLeft className="h-5 w-5" />
+          )}
+        </button>
+      )}
 
       <Sidebar collapsible="icon" className="group-data-[side=left]:border-r">
         {/* Desktop-only toggle button (hover effect) */}
@@ -86,7 +104,7 @@ const isCollapsed = state === "collapsed";
               "bg-background border border-border shadow-sm text-muted-foreground",
               "opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100",
               "hover:bg-accent hover:text-accent-foreground",
-              "transition-all duration-200 active:scale-95"
+              "transition-all duration-200 active:scale-95",
             )}
           >
             {isCollapsed ? (
@@ -136,7 +154,7 @@ const isCollapsed = state === "collapsed";
                     <ChevronRight
                       className={cn(
                         "ml-auto size-4 transition-transform",
-                        isCollapsed && "rotate-180"
+                        isCollapsed && "rotate-180",
                       )}
                     />
                   </SidebarMenuButton>
@@ -153,7 +171,8 @@ const isCollapsed = state === "collapsed";
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="text-red-500"
-                    onClick={() => console.log("Logout")}
+                    onClick={() => handleLogout()}
+                    disabled={logoutLoading}
                   >
                     <LogOut className="mr-2 size-4" />
                     Log out
