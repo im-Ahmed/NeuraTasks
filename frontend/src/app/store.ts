@@ -5,11 +5,13 @@ import { commentFetching } from "@/features/comments/realTimeCommentFetching";
 import { logApi } from "@/features/log/logSlice";
 import { logFetching } from "@/features/log/realTimeLogFetching";
 import { taskApi } from "@/features/task/taskSlice";
+import { userApi } from "@/features/user/userSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
 // Add the reducers to define the dataflows
 export const store = configureStore({
   reducer: {
+    [userApi.reducerPath]: userApi.reducer,
     [boardApi.reducerPath]: boardApi.reducer,
     [boardFetching.reducerPath]: boardFetching.reducer,
     [logApi.reducerPath]: logApi.reducer,
@@ -26,5 +28,6 @@ export const store = configureStore({
       .concat(logFetching.middleware)
       .concat(taskApi.middleware)
       .concat(commentApi.middleware)
-      .concat(commentFetching.middleware),
+      .concat(commentFetching.middleware)
+      .concat(userApi.middleware),
 });

@@ -5,6 +5,7 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  getCurrentUser,
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { handleBoardOnUserDelete } from "../middlewares/handleUserDelete.middleware.js";
@@ -14,7 +15,8 @@ router.route("/register").post(upload.single("avatar"), registerUser);
 router.route("/login").post(loginUser);
 // secure route
 router.use(verifyJWT);
+router.route("/profile").get(getCurrentUser);
 router.route("/logout").post(logoutUser);
-router.route("/delete").delete(handleBoardOnUserDelete,deleteUser);
+router.route("/delete").delete(handleBoardOnUserDelete, deleteUser);
 
 export default router;

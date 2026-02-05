@@ -6,19 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const containerVariants: Variants = {
-  hidden: { opacity: 0 },
+  hidden: {},
   visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2 },
+    transition: {
+      staggerChildren: 0.18,
+    },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: {
+    opacity: 0,
+    y: 24,
+    scale: 0.97,
+  },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, ease: "easeOut" },
+    scale: 1,
+    transition: {
+      duration: 0.8,
+      ease: [0.16, 1, 0.3, 1], // easeOutExpo-ish
+    },
   },
 };
 
@@ -28,11 +37,11 @@ const Hero = () => {
       <Navbar></Navbar>
 
       {/* UNIQUE BACKGROUND */}
-      <div className="absolute inset-0 -z-0 overflow-hidden">
+      <div className="absolute inset-0 -z-0 overflow-hidden pointer-events-none">
         <GlowBackground />
       </div>
 
-      <main className="relative z-10 flex h-full flex-col items-center justify-center px-6 lg:px-12">
+      <main className="relative z-10 flex h-[80vh] flex-col items-center justify-center px-6 lg:px-12">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -49,16 +58,20 @@ const Hero = () => {
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-5 mt-4"
+            className="flex flex-row gap-5 mt-4"
           >
             <Link to="/signUp">
-              <Button size="lg" className="min-w-[180px]">
+              <Button size="lg" className="min-w-30">
                 Get Started
               </Button>
             </Link>
 
             <Link to="/login">
-              <Button size="lg" variant="secondary" className="min-w-[180px]">
+              <Button
+                size="lg"
+                variant="outline"
+                className="min-w-30 border border-neutral-700 bg-transparent text-white"
+              >
                 Login
               </Button>
             </Link>

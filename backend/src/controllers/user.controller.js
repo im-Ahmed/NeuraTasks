@@ -130,4 +130,13 @@ const deleteUser = asyncHandler(async (req, res, _) => {
     .status(200)
     .json(new ApiResponse(200, {}, "User deleted Successfully"));
 });
-export { registerUser, loginUser, logoutUser, deleteUser };
+const getCurrentUser = asyncHandler(async (req, res, _) => {
+  const user = req.user;
+  if (!user) {
+    throw new ApiError(401, "User not authenticated");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { user }, "Current user fetched successfully"));
+});
+export { registerUser, loginUser, logoutUser, deleteUser, getCurrentUser };

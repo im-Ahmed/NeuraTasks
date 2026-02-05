@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import TestScreen from "./pages/TestScreen";
 import Board from "./pages/boards";
 import Task from "./pages/tasks";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -18,7 +19,14 @@ function App() {
         <Route path="/login" element={<Login />} key="login" />
         <Route path="/signUp" element={<SignUp />} key="signUp" />
         {/* protected routes */}
-        <Route path="/dashboard" element={<Layout />}>
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Dashboard />} key="dashboard" />
           <Route path="inbox" element={<h1>Inbox</h1>} key="inbox" />{" "}
           <Route path="board" element={<Board />} key="board" />
