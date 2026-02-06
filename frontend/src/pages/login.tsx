@@ -26,8 +26,7 @@ const Login = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const response = await loginUser(formData).unwrap();
-      console.log("Login successful:", response);
+      await loginUser(formData).unwrap();
       setLoading(false);
       window.location.href = "/dashboard";
     } catch (err) {

@@ -6,6 +6,7 @@ import { logApi } from "@/features/log/logSlice";
 import { logFetching } from "@/features/log/realTimeLogFetching";
 import { taskApi } from "@/features/task/taskSlice";
 import { userApi } from "@/features/user/userSlice";
+import authReducer from "@/features/user/userSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
 // Add the reducers to define the dataflows
@@ -19,6 +20,7 @@ export const store = configureStore({
     [taskApi.reducerPath]: taskApi.reducer,
     [commentApi.reducerPath]: commentApi.reducer,
     [commentFetching.reducerPath]: commentFetching.reducer,
+    auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -31,3 +33,6 @@ export const store = configureStore({
       .concat(commentFetching.middleware)
       .concat(userApi.middleware),
 });
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

@@ -34,7 +34,11 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useLogoutUserMutation } from "@/features/user/userSlice";
+import type { RootState } from "@/app/store";
+import type { User } from "@/types/UserTypes";
 import { toast } from "sonner";
+import { memo, useMemo } from "react";
+import { useSelector, shallowEqual } from "react-redux";
 
 const items = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -45,6 +49,39 @@ const items = [
   { title: "Search", url: "/dashboard/search", icon: Search },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
+const AvatarPreview = memo(function AvatarPreview() {
+  const user = useSelector(
+    (state: RootState) => state.auth.user,
+    shallowEqual,
+  ) as User | null;
+  const initials = useMemo(() => {
+    if (!user?.name) return "AF";
+    return user.name
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toLocaleUpperCase();
+  }, [user?.name]);
+
+  return (
+    <>
+      <Avatar className="h-8 w-8">
+        <AvatarImage
+          src={user?.avatar ?? "/avatar.png"}
+          alt={user?.name ?? "User"}
+        />
+        <AvatarFallback>{initials}</AvatarFallback>
+      </Avatar>
+      <div className="flex flex-col text-left leading-tight">
+        <span className="text-sm font-medium">{user?.name ?? "Anonymous"}</span>
+        <span className="text-xs text-muted-foreground">
+          {user?.email ?? ""}
+        </span>
+      </div>
+    </>
+  );
+});
 
 export function AppSidebar() {
   const { state, toggleSidebar, isMobile } = useSidebar();
@@ -141,16 +178,7 @@ export function AppSidebar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton size="lg">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/avatar.png" alt="Ahmed Farooq" />
-                      <AvatarFallback>AF</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col text-left leading-tight">
-                      <span className="text-sm font-medium">Ahmed Farooq</span>
-                      <span className="text-xs text-muted-foreground">
-                        m@example.com
-                      </span>
-                    </div>
+                    <AvatarPreview />
                     <ChevronRight
                       className={cn(
                         "ml-auto size-4 transition-transform",
