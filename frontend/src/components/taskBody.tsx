@@ -46,13 +46,15 @@ export function TaskBody({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
       >
-        <ListChecks className="h-16 w-16 text-indigo-200" />
-        <p className="text-indigo-600 text-lg font-medium">
-          No tasks available
-        </p>
+        <ListChecks className="h-16 w-16 text-white/40" />
+        <p className="text-white text-lg font-medium">No tasks available</p>
         <Button
           onClick={onAssignClick}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          className="text-white"
+          style={{
+            backgroundColor: "oklch(0.6 0.24 293.9)",
+            boxShadow: "0 8px 24px oklch(0.6 0.24 293.9 / 0.25)",
+          }}
         >
           Assign First Task
         </Button>
@@ -69,17 +71,17 @@ export function TaskBody({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h4 className="font-semibold text-indigo-600 mb-2 flex items-center">
+        <h4 className="font-semibold text-white mb-2 flex items-center">
           Task list
         </h4>
         {tasks.map((task) => (
           <motion.div
             key={task.id}
             onClick={() => onTaskSelect(task.id)}
-            className={`relative min-w-[200px] cursor-pointer rounded-lg border bg-white p-4 m-2 ${
+            className={`relative min-w-[200px] cursor-pointer rounded-lg border bg-white/5 p-4 m-2 ${
               task.id === activeTaskId
-                ? "border-indigo-200 ring-1 ring-indigo-200"
-                : "border-gray-200"
+                ? "border-white/30 ring-1 ring-[oklch(0.6_0.24_293.9)]/30"
+                : "border-white/10"
             }`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -94,8 +96,8 @@ export function TaskBody({
               />
             </div>
 
-            <h3 className="font-medium text-indigo-600">{task.title}</h3>
-            <p className="text-sm text-indigo-400 line-clamp-2 mt-1">
+            <h3 className="font-medium text-white">{task.title}</h3>
+            <p className="text-sm text-white/60 line-clamp-2 mt-1">
               {task.description}
             </p>
           </motion.div>
@@ -113,22 +115,20 @@ export function TaskBody({
           <div className="flex flex-col gap-6">
             {/* Task Details */}
             <motion.div
-              className="border h-[32vh] rounded-lg bg-white p-4 shadow-sm relative"
+              className="border border-white/10 h-[32vh] rounded-lg bg-white/5 p-4 shadow-sm relative"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.05 }}
             >
               {/* ✅ three dots menu at top-right */}
 
-              <h4 className="font-semibold text-indigo-600 mb-2">
-                Task Details
-              </h4>
-              <p className="font-medium">{activeTask.title}</p>
-              <p className="text-sm text-indigo-400 mt-2">
+              <h4 className="font-semibold text-white mb-2">Task Details</h4>
+              <p className="font-medium text-white">{activeTask.title}</p>
+              <p className="text-sm text-white/60 mt-2">
                 {activeTask.description}
               </p>
               {activeTask.dueDate && (
-                <p className="mt-2 text-sm text-indigo-500">
+                <p className="mt-2 text-sm text-white/70">
                   Due: {activeTask.dueDate}
                 </p>
               )}
@@ -136,14 +136,14 @@ export function TaskBody({
 
             {/* Status Panel */}
             <motion.div
-              className="border h-[25vh] rounded-lg bg-white p-4 shadow-sm"
+              className="border border-white/10 h-[25vh] rounded-lg bg-white/5 p-4 shadow-sm"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h4 className="font-semibold text-indigo-600 mb-2">Status</h4>
-              <p className="font-medium text-indigo-700">{activeTask.status}</p>
-              <p className="text-sm mt-2 text-indigo-500">
+              <h4 className="font-semibold text-white mb-2">Status</h4>
+              <p className="font-medium text-white">{activeTask.status}</p>
+              <p className="text-sm mt-2 text-white/70">
                 Assigned to: {activeTask.assignee}
               </p>
             </motion.div>
@@ -151,26 +151,29 @@ export function TaskBody({
 
           {/* Chat Panel */}
           <motion.div
-            className="border h-[60vh] rounded-lg flex flex-col bg-white shadow-sm"
+            className="border border-white/10 h-[60vh] rounded-lg flex flex-col bg-white/5 p-4 shadow-sm"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 }}
           >
-            <div className="p-3 border-b flex items-center gap-2 text-indigo-600 font-medium">
+            <div className="p-3 border-b flex items-center gap-2 text-white font-medium">
               <MessageSquare className="h-4 w-4" />
               Board Chat
             </div>
-            <div className="flex-1 p-4 text-sm text-indigo-400">
+            <div className="flex-1 p-4 text-sm text-white">
               Start discussion…
             </div>
             <div className="p-3 border-t flex gap-2">
               <Input
                 placeholder="Message..."
-                className="focus:ring-indigo-500 text-indigo-500"
+                className="focus:ring-white text-white"
               />
               <Button
+                style={{
+                  backgroundColor: "oklch(0.6 0.24 293.9)",
+                }}
                 size="icon"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="bg-[oklch(0.6 0.24 293.9)] hover:bg-indigo-700 text-white"
               >
                 →
               </Button>
