@@ -17,6 +17,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useState } from "react";
+import type { User } from "@/types/UserTypes";
 
 // Form validation schema
 const createBoardSchema = z.object({
@@ -26,15 +27,10 @@ const createBoardSchema = z.object({
 
 type CreateBoardForm = z.infer<typeof createBoardSchema>;
 
-interface User {
-  id: string;
-  name: string;
-}
-
 interface CreateBoardProps {
-  onSuccess: (data: CreateBoardForm & { members: string[] }) => void;
+  onSuccess: (data: CreateBoardForm & { userIds: string[] }) => void;
   onCancel: () => void;
-  availableUsers: User[];
+  availableUsers: Array<Partial<User>> | undefined;
 }
 
 export default function CreateBoard({
@@ -61,7 +57,7 @@ export default function CreateBoard({
 
   const onSubmit = (data: CreateBoardForm) => {
     try {
-      const boardData = { ...data, members: selectedMembers };
+      const boardData = { ...data, userIds: selectedMembers };
       onSuccess(boardData); //on successful submission it pass data to handleboardcreation function in parent which than make the side component
       toast.success("Board created successfully!");
     } catch (error) {
@@ -142,40 +138,35 @@ export default function CreateBoard({
                   Name
                 </TableHead>
                 <TableHead className="whitespace-nowrap text-white/70">
-                  ID
+                  Username
                 </TableHead>
                 <TableHead className="whitespace-nowrap text-white/70">
-                  Identifier
-                </TableHead>
-                <TableHead className="whitespace-nowrap text-white/70">
-                  Role
+                  Email
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {availableUsers.map((user) => (
+              {availableUsers?.map((user: Partial<User>) => (
                 <TableRow
-                  key={user.id}
+                  key={user._id}
                   className="border-b border-white/5 hover:bg-white/5"
                 >
                   <TableCell>
                     <Checkbox
-                      checked={selectedMembers.includes(user.id)}
-                      onCheckedChange={() => toggleMember(user.id)}
+                      checked={selectedMembers.includes(user._id!)}
+                      onCheckedChange={() => toggleMember(user._id!)}
                       className="border-white/30"
                     />
                   </TableCell>
                   <TableCell className="truncate max-w-[140px] sm:max-w-none text-white/80">
                     {user.name}
                   </TableCell>
+
                   <TableCell className="truncate text-white/80">
-                    {user.id}
+                    {user.username}
                   </TableCell>
                   <TableCell className="truncate text-white/80">
-                    {user.name}
-                  </TableCell>
-                  <TableCell className="truncate text-white/80">
-                    {user.name}
+                    {user.email}
                   </TableCell>
                 </TableRow>
               ))}
@@ -183,7 +174,7 @@ export default function CreateBoard({
           </Table>
         </div>
 
-        {availableUsers.length === 0 && (
+        {availableUsers?.length === 0 && (
           <p className="text-white/50 text-xs sm:text-sm mt-2">
             No users available to add.
           </p>

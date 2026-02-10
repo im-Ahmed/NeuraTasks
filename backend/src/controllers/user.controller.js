@@ -139,4 +139,13 @@ const getCurrentUser = asyncHandler(async (req, res, _) => {
     .status(200)
     .json(new ApiResponse(200, { user }, "Current user fetched successfully"));
 });
-export { registerUser, loginUser, logoutUser, deleteUser, getCurrentUser };
+const getAllUser = asyncHandler(async (req, res, _) => {
+  const users = await User.find().select("-password -refreshToken");
+  if(users.length === 0){
+    throw new ApiError(404, "No users found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { users }, "All users fetched successfully"));
+});
+export { registerUser, loginUser, logoutUser, deleteUser, getCurrentUser, getAllUser };

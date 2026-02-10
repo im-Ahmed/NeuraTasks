@@ -10,6 +10,9 @@ type LoginResponse = ApiResponse<{
 type UserProfileResponse = ApiResponse<{
   user: Partial<User>;
 }>;
+export type AllUserResponse = ApiResponse<{
+  users: Array<Partial<User>>
+}>
 export type AuthState = {
   isAdmin: boolean;
   user: Partial<User> | null;
@@ -58,6 +61,13 @@ export const userApi = createApi({
         credentials: "include",
       }),
     }),
+    getAllUser: build.query<AllUserResponse, void>({
+      query: () => ({
+        url: "all",
+        method: "GET",
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
@@ -84,4 +94,5 @@ export const {
   useLogoutUserMutation,
   useDeleteUserMutation,
   useGetUserProfileQuery,
+  useGetAllUserQuery
 } = userApi;

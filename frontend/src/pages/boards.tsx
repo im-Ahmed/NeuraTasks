@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import CreateBoard from "../components/createBoard";
 import ActionMenuRecommended from "../components/actionBtn";
+import { useGetAllUserQuery } from "@/features/user/userSlice";
 
 // Define Board Item Type
 interface BoardItem {
@@ -29,27 +30,27 @@ interface BoardItem {
   title: string;
   description: string;
   icon: string;
-  members: string[];
+  userIds: string[];
   content: React.ReactNode;
 }
 
 // Mock available users (replace with real data from props/context/API)
-const availableUsers = [
-  {
-    id: "user1",
-    name: "Alice Johnson",
-    Mail: "hello@gmai.com",
-    Role: "employer",
-  },
-  { id: "user2", name: "Bob Smith", Mail: "hello@gmai.com", Role: "employer" },
-  {
-    id: "user3",
-    name: "Charlie Davis",
-    Mail: "hello@gmai.com",
-    Role: "employer",
-  },
-  { id: "user4", name: "Dana Lee", Mail: "hello@gmai.com", Role: "employer" },
-];
+// const availableUsers = [
+//   {
+//     id: "user1",
+//     name: "Alice Johnson",
+//     Mail: "hello@gmai.com",
+//     Role: "employer",
+//   },
+//   { id: "user2", name: "Bob Smith", Mail: "hello@gmai.com", Role: "employer" },
+//   {
+//     id: "user3",
+//     name: "Charlie Davis",
+//     Mail: "hello@gmai.com",
+//     Role: "employer",
+//   },
+//   { id: "user4", name: "Dana Lee", Mail: "hello@gmai.com", Role: "employer" },
+// ];
 
 const initialSidebarItems: BoardItem[] = [];
 
@@ -100,7 +101,7 @@ const getItemContent = (item: Omit<BoardItem, "content">): React.ReactNode => (
         <strong>Created by:</strong> Admin001
       </p>
       <p className="text-white/80">
-        <strong>Members:</strong> {item.members.join(", ") || "None"}
+        <strong>Members:</strong> {item.userIds.join(", ") || "None"}
       </p>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,6 +119,8 @@ const getItemContent = (item: Omit<BoardItem, "content">): React.ReactNode => (
 );
 
 export default function Board() {
+  const { data: allUsers } = useGetAllUserQuery();
+
   const [sidebarItems, setSidebarItems] =
     useState<BoardItem[]>(initialSidebarItems);
   const [selectedItem, setSelectedItem] = useState<BoardItem | null>(null);
@@ -240,7 +243,7 @@ export default function Board() {
                   <CreateBoard
                     onSuccess={handleBoardCreated}
                     onCancel={() => setIsCreateModalOpen(false)}
-                    availableUsers={availableUsers}
+                    availableUsers={allUsers?.data.users}
                   />
                 </DialogContent>
               </Dialog>
