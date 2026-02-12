@@ -12,8 +12,13 @@ type WSEvent =
 
 export const boardFetching = createApi({
   reducerPath: "BoardFetching", // Good practice to name the reducer path
-  baseQuery: fetchBaseQuery({ baseUrl: "/api/v1/boards" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "/api/v1/boards",
+    credentials: "include",
+  }),
+
   tagTypes: ["Boards"], // Optional: Useful if you want to force-refetch manually later
+
   endpoints: (build) => ({
     getAllBoard: build.query<BoardResponse, void>({
       query: () => `/`, // This triggers the HTTP GET. Make sure backend returns JSON here!

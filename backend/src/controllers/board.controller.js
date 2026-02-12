@@ -80,7 +80,7 @@ const getAllBoard = asyncHandler(async (req, res, _) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(500, { boards }, "All boards are fetched successfully")
+      new ApiResponse(200, { boards }, "All boards are fetched successfully")
     );
 });
 const deleteBoard = asyncHandler(async (req, res, _) => {

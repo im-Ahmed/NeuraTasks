@@ -20,9 +20,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"; // shadcn/ui Dialog
 import { cn } from "@/lib/utils";
-import CreateBoard from "../components/createBoard";
 import ActionMenuRecommended from "../components/actionBtn";
 import { useGetAllUserQuery } from "@/features/user/userSlice";
+import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
+import type { Board } from "@/types/BoardTypes";
+import CreateBoard from "@/components/createBoard";
 
 // Define Board Item Type
 interface BoardItem {
@@ -33,26 +35,6 @@ interface BoardItem {
   userIds: string[];
   content: React.ReactNode;
 }
-
-// Mock available users (replace with real data from props/context/API)
-// const availableUsers = [
-//   {
-//     id: "user1",
-//     name: "Alice Johnson",
-//     Mail: "hello@gmai.com",
-//     Role: "employer",
-//   },
-//   { id: "user2", name: "Bob Smith", Mail: "hello@gmai.com", Role: "employer" },
-//   {
-//     id: "user3",
-//     name: "Charlie Davis",
-//     Mail: "hello@gmai.com",
-//     Role: "employer",
-//   },
-//   { id: "user4", name: "Dana Lee", Mail: "hello@gmai.com", Role: "employer" },
-// ];
-
-const initialSidebarItems: BoardItem[] = [];
 
 // Animated Glow Background (from hero page)
 const GlowBackground = () => {
@@ -88,7 +70,9 @@ const GlowBackground = () => {
 };
 
 // Generate content for each board
-const getItemContent = (item: Omit<BoardItem, "content">): React.ReactNode => (
+const renderBoardContent = (
+  item: Omit<BoardItem, "content">,
+): React.ReactNode => (
   <>
     <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
       {item.title} Details
@@ -120,13 +104,13 @@ const getItemContent = (item: Omit<BoardItem, "content">): React.ReactNode => (
 
 export default function Board() {
   const { data: allUsers } = useGetAllUserQuery();
-
-  const [sidebarItems, setSidebarItems] =
-    useState<BoardItem[]>(initialSidebarItems);
+  const { data: allBoards, isLoading: boardLoading } = useGetAllBoardQuery();
   const [selectedItem, setSelectedItem] = useState<BoardItem | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const isEmpty = sidebarItems.length === 0;
+  const boards = allBoards?.data?.boards ?? [];
+  const isEmpty = boards.length === 0 && !boardLoading;
+
   // this is the function that pass as an argument to createbaord
   const handleBoardCreated = (
     newBoardData: Omit<BoardItem, "id" | "content" | "icon">,
@@ -135,36 +119,33 @@ export default function Board() {
       ...newBoardData,
       id: `board-${Date.now()}`,
       icon: "📋",
-      content: getItemContent({
+      content: renderBoardContent({
         ...newBoardData,
         id: `board-${Date.now()}`,
         icon: "📋",
       }),
     };
 
-    setSidebarItems((prev) => [...prev, newBoard]);
     setSelectedItem(newBoard);
     setIsCreateModalOpen(false);
   };
   const handleDuplicateBoard = (id: string) => {
-    const board = sidebarItems.find((b) => b.id === id);
-    if (!board) return;
-
-    const copy = {
-      ...board,
-      id: "board-" + Date.now(),
-      title: board.title + " Copy",
-    };
-
-    setSidebarItems((prev) => [...prev, copy]);
+    // const board = sidebarItems.find((b) => b.id === id);
+    // if (!board) return;
+    // const copy = {
+    //   ...board,
+    //   id: "board-" + Date.now(),
+    //   title: board.title + " Copy",
+    // };
+    // setSidebarItems((prev) => [...prev, copy]);
   };
   const handleDeleteBoard = (id: string) => {
-    setSidebarItems((prev) => prev.filter((b) => b.id !== id));
-    if (selectedItem?.id === id) setSelectedItem(null);
+    // setSidebarItems((prev) => prev.filter((b) => b.id !== id));
+    // if (selectedItem?.id === id) setSelectedItem(null);
   };
   const handleUpdateBoard = (id: string) => {
-    const board = sidebarItems.find((b) => b.id === id);
-    alert("Update board: " + board?.title);
+    // const board = sidebarItems.find((b) => b.id === id);
+    // alert("Update board: " + board?.title);
     // open edit dialog later
   };
 
@@ -178,7 +159,7 @@ export default function Board() {
       {/* Content */}
       <div className="relative z-10 grid grid-rows-[auto_1fr_auto] min-h-screen">
         {/* Header */}
-        <div className="p-6 border-b border-white/10">
+        <div className="p-6 border-b border-white/10 bg-gradient-to-r from-white/5 to-white/0">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
               Boards
@@ -293,37 +274,38 @@ export default function Board() {
               >
                 {/* Sidebar */}
                 <div className="flex flex-col gap-4 lg:col-span-1">
-                  {sidebarItems.map((item) => (
+                  {boards.map((board: Board) => (
                     <Card
-                      key={item.id}
-                      onClick={() => setSelectedItem(item)}
+                      key={board._id}
+                      // onClick={() => setSelectedItem(board)}
                       className={cn(
                         "cursor-pointer transition-all duration-200 bg-neutral-800/20 backdrop-blur border border-white/10 hover:bg-neutral-800/40 hover:border-white/20",
-                        selectedItem?.id === item.id &&
+                        selectedItem?.id === board._id &&
                           "bg-white/10 border-white/30 ring-2 ring-[oklch(0.6_0.24_293.9)]/30",
                       )}
                     >
                       <CardHeader>
                         <div className="flex items-start justify-between gap-3">
-                          {/* Left: Icon */}
-                          <span className="text-3xl">{item.icon}</span>
-
                           <div className="flex-1 flex flex-col">
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg md:text-xl">
-                                {item.title}
+                              <CardTitle className="text-lg md:text-xl text-white">
+                                {board.title}
                               </CardTitle>
-                              {selectedItem?.id === item.id && (
-                                <ActionMenuRecommended
-                                  selectedBoard={selectedItem}
-                                  onDelete={handleDeleteBoard}
-                                  onDuplicate={handleDuplicateBoard}
-                                  onUpdate={handleUpdateBoard}
-                                />
-                              )}
+
+                              {
+                                // Menu buttons (three dots)
+                                selectedItem?.id === board._id && (
+                                  <ActionMenuRecommended
+                                    selectedBoard={selectedItem}
+                                    onDelete={handleDeleteBoard}
+                                    onDuplicate={handleDuplicateBoard}
+                                    onUpdate={handleUpdateBoard}
+                                  />
+                                )
+                              }
                             </div>
                             <CardDescription className="text-[#dce0ebe0] mt-1">
-                              {item.description}
+                              {board.description}
                             </CardDescription>
                           </div>
                         </div>
@@ -331,7 +313,7 @@ export default function Board() {
 
                       <CardFooter className="justify-end">
                         <span className="text-sm text-muted-foreground">
-                          {selectedItem?.id === item.id
+                          {selectedItem?.id === board._id
                             ? "Selected"
                             : "Select →"}
                         </span>

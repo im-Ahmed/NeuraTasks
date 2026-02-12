@@ -16,13 +16,13 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { useState } from "react";
 import type { User } from "@/types/UserTypes";
 
 // Form validation schema
 const createBoardSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
+  userIds: z.array(z.string()).min(1, "Select at least one member"),
 });
 
 type CreateBoardForm = z.infer<typeof createBoardSchema>;
@@ -38,27 +38,28 @@ export default function CreateBoard({
   onCancel,
   availableUsers,
 }: CreateBoardProps) {
-  // const { toast } = useToast();
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-
   const form = useForm<CreateBoardForm>({
     resolver: zodResolver(createBoardSchema),
     defaultValues: {
       title: "",
       description: "",
+      userIds: [],
     },
   });
 
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = form;
 
+  const selectedMembers = watch("userIds");
+
   const onSubmit = (data: CreateBoardForm) => {
     try {
-      const boardData = { ...data, userIds: selectedMembers };
-      onSuccess(boardData); //on successful submission it pass data to handleboardcreation function in parent which than make the side component
+      onSuccess(data); // userIds already included
       toast.success("Board created successfully!");
     } catch (error) {
       toast.error("Failed to create board");
@@ -66,12 +67,11 @@ export default function CreateBoard({
   };
 
   const toggleMember = (userId: string) => {
-    setSelectedMembers(
-      (prev) =>
-        prev.includes(userId)
-          ? prev.filter((id) => id !== userId)
-          : [...prev, userId], //thislines check if user include in list than filter that user if not include add in list
-    );
+    const updatedMembers = selectedMembers.includes(userId)
+      ? selectedMembers.filter((id) => id !== userId)
+      : [...selectedMembers, userId];
+
+    setValue("userIds", updatedMembers, { shouldValidate: true });
   };
 
   return (
@@ -173,6 +173,11 @@ export default function CreateBoard({
             </TableBody>
           </Table>
         </div>
+        {errors.userIds && (
+          <p className="text-red-400 text-xs sm:text-sm mt-2">
+            {errors.userIds.message}
+          </p>
+        )}
 
         {availableUsers?.length === 0 && (
           <p className="text-white/50 text-xs sm:text-sm mt-2">
