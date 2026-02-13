@@ -38,11 +38,15 @@ const createBoard = asyncHandler(async (req, res, _) => {
   if (!board) {
     throw new ApiError(500, "Something went wrong while creating board");
   }
+  const populatedBoard = await Board.findById(board._id).populate(
+    "members",
+    "username avatar role _id"
+  );
   // Notify all connected clients about the new board
-  broadcast({ type: "BOARD_CREATED", board });
+  broadcast({ type: "BOARD_CREATED", board: populatedBoard });
   return res
     .status(201)
-    .json(new ApiResponse(201, board, "Board created successfully"));
+    .json(new ApiResponse(201, populatedBoard, "Board created successfully"));
 });
 const getAllBoard = asyncHandler(async (req, res, _) => {
   const userId = req.user._id;

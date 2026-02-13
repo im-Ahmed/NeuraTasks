@@ -14,23 +14,22 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 import { useState } from "react";
-import { EllipsisVertical, Trash2, Pencil, Copy } from "lucide-react";
+import { EllipsisVertical, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { Board } from "@/types/BoardTypes";
 
 interface Props {
-  selectedBoard: { id: string; title: string } | null;
+  selectedBoard: Board | null;
   onDelete: (id: string) => void;
-  onDuplicate: (id: string) => void;
   onUpdate: (id: string) => void;
 }
 
 export default function ActionMenuRecommended({
   selectedBoard,
   onDelete,
-  onDuplicate,
   onUpdate,
 }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -41,19 +40,19 @@ export default function ActionMenuRecommended({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-         <motion.div
-              // whileHover={{ rotate: 90 }}
-              // transition={{ duration: 0.2 }}
-              className="bg-none hover:bg-none"
+          <motion.div
+            // whileHover={{ rotate: 90 }}
+            // transition={{ duration: 0.2 }}
+            className="bg-none hover:bg-none"
+          >
+            <Button
+              size="icon"
+              variant={null}
+              className="h-10 w-full sm:w-10 text-white bg-gray"
             >
-              <Button
-                size="icon"
-               variant={null}
-                className="h-10 w-full sm:w-10 text-white bg-gray"
-              >
-                <EllipsisVertical className="bg-none hover:bg-none" />
-              </Button>
-            </motion.div>
+              <EllipsisVertical className="bg-none hover:bg-none" />
+            </Button>
+          </motion.div>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg">
@@ -62,20 +61,13 @@ export default function ActionMenuRecommended({
 
           <DropdownMenuItem
             disabled={disabled}
-            onClick={() => selectedBoard && onUpdate(selectedBoard.id)}
+            onClick={() =>
+              selectedBoard && onUpdate(selectedBoard._id as string)
+            }
             className="gap-2"
           >
             <Pencil className="h-4 w-4" />
             Update
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            disabled={disabled}
-            onClick={() => selectedBoard && onDuplicate(selectedBoard.id)}
-            className="gap-2"
-          >
-            <Copy className="h-4 w-4" />
-            Duplicate
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -113,7 +105,7 @@ export default function ActionMenuRecommended({
             <Button
               variant="destructive"
               onClick={() => {
-                if (selectedBoard) onDelete(selectedBoard.id);
+                if (selectedBoard) onDelete(selectedBoard._id as string);
                 setConfirmOpen(false);
               }}
             >

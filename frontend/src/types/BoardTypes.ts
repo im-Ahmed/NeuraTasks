@@ -9,13 +9,13 @@ export type Board = {
   _id?: string;
   title: string;
   description: string;
-  members: BoardMember[] | string[];
+  members: (BoardMember | string)[];
   createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
 };
 
-export type CreateBoard = {
+export type CreateBoardType = {
   _id?: string;
   title: string;
   description: string;

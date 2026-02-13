@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { ApiResponse } from "@/types/generalTypes";
-import type { Board, CreateBoard } from "@/types/BoardTypes";
+import type { Board, CreateBoardType } from "@/types/BoardTypes";
 
 export const boardApi = createApi({
   reducerPath: "boardApi",
@@ -17,7 +17,7 @@ export const boardApi = createApi({
   }),
   endpoints: (build) => ({
     // create new boards
-    addBoard: build.mutation<ApiResponse<Board>, CreateBoard>({
+    addBoard: build.mutation<ApiResponse<Board>, CreateBoardType>({
       query: (formData) => ({
         url: "create",
         method: "POST",
@@ -32,7 +32,7 @@ export const boardApi = createApi({
       }),
     }),
     //
-    updateBoard: build.mutation<ApiResponse<Board>, Partial<CreateBoard>>({
+    updateBoard: build.mutation<ApiResponse<Board>, Partial<CreateBoardType>>({
       query: (updateBoard) => {
         const { _id: boardId, ...body } = updateBoard;
         return {

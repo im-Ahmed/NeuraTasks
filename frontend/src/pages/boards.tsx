@@ -8,7 +8,6 @@ import {
   CardTitle,
   CardDescription,
   CardFooter,
-  CardContent,
 } from "@/components/ui/card"; // shadcn/ui
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -23,18 +22,12 @@ import { cn } from "@/lib/utils";
 import ActionMenuRecommended from "../components/actionBtn";
 import { useGetAllUserQuery } from "@/features/user/userSlice";
 import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
-import type { Board } from "@/types/BoardTypes";
+import type { Board, CreateBoardType } from "@/types/BoardTypes";
 import CreateBoard from "@/components/createBoard";
-
-// Define Board Item Type
-interface BoardItem {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  userIds: string[];
-  content: React.ReactNode;
-}
+import {
+  useAddBoardMutation,
+  useDeleteBoardMutation,
+} from "@/features/board/boardSlice";
 
 // Animated Glow Background (from hero page)
 const GlowBackground = () => {
@@ -70,34 +63,38 @@ const GlowBackground = () => {
 };
 
 // Generate content for each board
-const renderBoardContent = (
-  item: Omit<BoardItem, "content">,
-): React.ReactNode => (
+const renderBoardContent = (board: Board) => (
   <>
     <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-      {item.title} Details
+      {board.title} Details
     </h3>
-    <p className="text-white/60 mb-6">{item.description}</p>
-    <div className="mb-6">
-      <h4 className="text-lg font-semibold mb-2">Board Info</h4>
 
-      <p className="text-white/80">
-        <strong>Created by:</strong> Admin001
-      </p>
-      <p className="text-white/80">
-        <strong>Members:</strong> {item.userIds.join(", ") || "None"}
-      </p>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="bg-neutral-800/20 backdrop-blur border border-white/10">
-        <CardHeader>
-          <CardTitle>Sample Stat</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold">1,234</p>
-          <p className="text-sm text-white/60">+12% this month</p>
-        </CardContent>
-      </Card>
+    <p className="text-white/60 mb-6">{board.description}</p>
+
+    <div className="mb-6">
+      <h4 className="text-lg font-semibold mb-2">Members</h4>
+
+      <div className="flex flex-wrap gap-3">
+        {board.members.map((member) => {
+          if (typeof member === "string") {
+            return null; // or render fallback
+          }
+
+          return (
+            <div
+              key={member._id}
+              className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full"
+            >
+              <img
+                src={member.avatar}
+                alt={member.username}
+                className="w-6 h-6 rounded-full object-cover"
+              />
+              <span className="text-sm">{member.username}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   </>
 );
@@ -105,45 +102,37 @@ const renderBoardContent = (
 export default function Board() {
   const { data: allUsers } = useGetAllUserQuery();
   const { data: allBoards, isLoading: boardLoading } = useGetAllBoardQuery();
-  const [selectedItem, setSelectedItem] = useState<BoardItem | null>(null);
+  const [addBoard, { isError: boardError }] = useAddBoardMutation();
+  const [deleteBoard, { isError: boardDeleteError }] = useDeleteBoardMutation();
+  const [selectedItem, setSelectedItem] = useState<Board | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const boards = allBoards?.data?.boards ?? [];
+
   const isEmpty = boards.length === 0 && !boardLoading;
 
   // this is the function that pass as an argument to createbaord
-  const handleBoardCreated = (
-    newBoardData: Omit<BoardItem, "id" | "content" | "icon">,
-  ) => {
-    const newBoard: BoardItem = {
-      ...newBoardData,
-      id: `board-${Date.now()}`,
-      icon: "📋",
-      content: renderBoardContent({
-        ...newBoardData,
-        id: `board-${Date.now()}`,
-        icon: "📋",
-      }),
-    };
+  const handleBoardCreated = async (newBoardData: CreateBoardType) => {
+    try {
+      const boardCreationResponse = await addBoard(newBoardData).unwrap();
+      const newBoard = boardCreationResponse.data;
+      setSelectedItem(newBoard);
+    } catch (err) {
+      console.log(`${boardError || err}`);
+    } finally {
+      setIsCreateModalOpen(false);
+    }
+  };
 
-    setSelectedItem(newBoard);
-    setIsCreateModalOpen(false);
-  };
-  const handleDuplicateBoard = (id: string) => {
-    // const board = sidebarItems.find((b) => b.id === id);
-    // if (!board) return;
-    // const copy = {
-    //   ...board,
-    //   id: "board-" + Date.now(),
-    //   title: board.title + " Copy",
-    // };
-    // setSidebarItems((prev) => [...prev, copy]);
-  };
   const handleDeleteBoard = (id: string) => {
-    // setSidebarItems((prev) => prev.filter((b) => b.id !== id));
-    // if (selectedItem?.id === id) setSelectedItem(null);
+    try {
+      deleteBoard(id);
+    } catch (err) {
+      console.log(`${boardDeleteError || err}`);
+    }
   };
   const handleUpdateBoard = (id: string) => {
+    console.log("Update id", id);
     // const board = sidebarItems.find((b) => b.id === id);
     // alert("Update board: " + board?.title);
     // open edit dialog later
@@ -277,10 +266,10 @@ export default function Board() {
                   {boards.map((board: Board) => (
                     <Card
                       key={board._id}
-                      // onClick={() => setSelectedItem(board)}
+                      onClick={() => setSelectedItem(board)}
                       className={cn(
                         "cursor-pointer transition-all duration-200 bg-neutral-800/20 backdrop-blur border border-white/10 hover:bg-neutral-800/40 hover:border-white/20",
-                        selectedItem?.id === board._id &&
+                        selectedItem?._id === board._id &&
                           "bg-white/10 border-white/30 ring-2 ring-[oklch(0.6_0.24_293.9)]/30",
                       )}
                     >
@@ -294,11 +283,10 @@ export default function Board() {
 
                               {
                                 // Menu buttons (three dots)
-                                selectedItem?.id === board._id && (
+                                selectedItem?._id === board._id && (
                                   <ActionMenuRecommended
                                     selectedBoard={selectedItem}
                                     onDelete={handleDeleteBoard}
-                                    onDuplicate={handleDuplicateBoard}
                                     onUpdate={handleUpdateBoard}
                                   />
                                 )
@@ -313,7 +301,7 @@ export default function Board() {
 
                       <CardFooter className="justify-end">
                         <span className="text-sm text-muted-foreground">
-                          {selectedItem?.id === board._id
+                          {selectedItem?._id === board._id
                             ? "Selected"
                             : "Select →"}
                         </span>
@@ -327,7 +315,7 @@ export default function Board() {
                   <ScrollArea className="h-full px-8 py-10">
                     <div className="pr-6">
                       {selectedItem ? (
-                        selectedItem.content
+                        renderBoardContent(selectedItem)
                       ) : (
                         <div className="text-center py-20">
                           <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
