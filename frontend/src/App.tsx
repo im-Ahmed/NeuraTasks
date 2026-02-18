@@ -3,12 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import SignUp from "./pages/signUp";
 import Dashboard from "./pages/dashboard";
-import Layout from "./components/Layout";
+import Layout from "./layouts/Layout";
 import NotFound from "./pages/NotFound";
 import TestScreen from "./pages/TestScreen";
 import Board from "./pages/boards";
 import Task from "./pages/tasks";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import UserLayout from "./layouts/UserLayout";
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <Layout />
             </ProtectedRoute>
           }
@@ -35,6 +36,14 @@ function App() {
           <Route path="search" element={<h1>Search Page</h1>} />
           <Route path="settings" element={<h1>Settings Page</h1>} />
         </Route>
+        <Route
+          path="/user-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["member"]}>
+              <UserLayout />
+            </ProtectedRoute>
+          }
+        />
         <Route path="test" element={<TestScreen />}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>

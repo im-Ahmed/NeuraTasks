@@ -57,7 +57,7 @@ export function TaskHeader({
         >
           {/* Board Select */}
           <Select value={selectedBoard} onValueChange={onBoardChange}>
-            <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-lg font-medium border-white/10 bg-white/5 text-white/90 focus-visible:ring-[oklch(0.6_0.24_293.9)]">
+            <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-sm font-medium border-white/10 bg-white/5 text-white/90">
               <SelectValue placeholder="Select Board" />
             </SelectTrigger>
             <SelectContent className="border-indigo-100">
@@ -65,7 +65,6 @@ export function TaskHeader({
                 <SelectItem
                   key={board.id}
                   value={board.id}
-                  className="focus:bg-white/5 focus:text-white"
                 >
                   {board.name}
                 </SelectItem>

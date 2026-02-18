@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {  useState } from "react";
 import { motion } from "framer-motion";
 
 import { TaskHeader } from "../components/taskHeader";
@@ -29,11 +29,7 @@ export default function Task() {
 
   // ✅ always safe array
   const boardTasks = tasks[selectedBoard] ?? [];
-  // ✅ safe selected task lookup (fixes undefined.find error class of bugs)
-  const activeTask = useMemo(
-    () => boardTasks.find((t) => t.id === activeTaskId) ?? null,
-    [boardTasks, activeTaskId],
-  );
+ 
 
   const handleDeleteTask = (id: string) => {
     setTasks((prev) => ({

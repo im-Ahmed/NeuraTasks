@@ -26,9 +26,11 @@ const Login = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      await loginUser(formData).unwrap();
+      const loginResponse = await loginUser(formData).unwrap();
       setLoading(false);
-      window.location.href = "/dashboard";
+      loginResponse.data.user.role === "admin"
+        ? (window.location.href = "/dashboard")
+        : (window.location.href = "/user-dashboard");
     } catch (err) {
       console.error("Failed to login:", err);
       setLoading(false);
