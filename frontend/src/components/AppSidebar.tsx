@@ -33,12 +33,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useLogoutUserMutation } from "@/features/user/userSlice";
-import type { RootState } from "@/app/store";
-import type { User } from "@/types/UserTypes";
+import {
+  useGetUserProfileQuery,
+  useLogoutUserMutation,
+} from "@/features/user/userSlice";
 import { toast } from "sonner";
 import { memo, useMemo } from "react";
-import { useSelector, shallowEqual } from "react-redux";
 
 const items = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -50,10 +50,9 @@ const items = [
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 const AvatarPreview = memo(function AvatarPreview() {
-  const user = useSelector(
-    (state: RootState) => state.auth.user,
-    shallowEqual,
-  ) as User | null;
+  const { data: userResponse, } = useGetUserProfileQuery();
+
+  const user = userResponse?.data.user;
   const initials = useMemo(() => {
     if (!user?.name) return "AF";
     return user.name

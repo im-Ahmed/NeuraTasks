@@ -44,6 +44,7 @@ export const boardApi = createApi({
     }),
   }),
 });
+
 export const {
   useDeleteBoardMutation,
   useAddBoardMutation,

@@ -1,6 +1,6 @@
 "use client";
 
-import {  useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 
 import { TaskHeader } from "../components/taskHeader";
@@ -9,59 +9,59 @@ import type { TaskItem } from "../components/taskBody";
 import type { AssignTaskValues } from "../components/assignTask";
 import { AssignTaskDialog } from "../components/assignTask";
 
-const boards = [
-  { id: "frontend", name: "Frontend Board" },
-  { id: "backend", name: "Backend Board" },
-  { id: "design", name: "Design Board" },
-];
+import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
 
 export default function Task() {
-  const [selectedBoard, setSelectedBoard] = useState("frontend");
+  // 🔹 Fetch dynamic boards from backend
+  const { data: allBoard } = useGetAllBoardQuery();
+
+  // 🔹 Extract boards safely
+  const boards = allBoard?.data?.boards ?? [];
+
+  /**
+   * 🔹 selectedBoardId
+   * Should always be backend board.id
+   */
+  const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>(
+    undefined,
+  );
+
+  /**
+   * 🔹 Tasks stored dynamically per boardId
+   * Structure:
+   * {
+   *   "boardId1": TaskItem[],
+   *   "boardId2": TaskItem[]
+   * }
+   */
+  const [tasksByBoard, setTasksByBoard] = useState<Record<string, TaskItem[]>>(
+    {},
+  );
+
   const [openDialog, setOpenDialog] = useState(false);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
-  // ✅ tasks stored per board
-  const [tasks, setTasks] = useState<Record<string, TaskItem[]>>({
-    frontend: [],
-    backend: [],
-    design: [],
-  });
+  /**
+   * 🔹 Current board tasks (safe fallback)
+   */
+  const boardTasks = useMemo(() => {
+    if (!selectedBoardId) return [];
+    return tasksByBoard[selectedBoardId] ?? [];
+  }, [selectedBoardId, tasksByBoard]);
 
-  // ✅ always safe array
-  const boardTasks = tasks[selectedBoard] ?? [];
- 
+  // ============================================================
+  // ======================= HANDLERS ===========================
+  // ============================================================
 
-  const handleDeleteTask = (id: string) => {
-    setTasks((prev) => ({
-      ...prev,
-      [selectedBoard]: prev[selectedBoard].filter((t) => t.id !== id),
-    }));
-
-    if (activeTaskId === id) setActiveTaskId(null);
-  };
-
-  const handleDuplicateTask = (id: string) => {
-    const t = boardTasks.find((x) => x.id === id);
-    if (!t) return;
-
-    const copy: TaskItem = {
-      ...t,
-      id: "task-" + Date.now(),
-      title: t.title + " Copy",
-    };
-
-    setTasks((prev) => ({
-      ...prev,
-      [selectedBoard]: [...prev[selectedBoard], copy],
-    }));
-  };
-
-  const handleUpdateTask = (id: string) => {
-    // plug your update dialog here
-    alert("Open update dialog for task " + id);
-  };
-
+  /**
+   * 🔹 handleCreateTask
+   * TODO:
+   * - Option 1: Call backend mutation to create task
+   * - Option 2: Optimistically update UI
+   */
   const handleCreateTask = (data: AssignTaskValues) => {
+    if (!selectedBoardId) return;
+
     const newTask: TaskItem = {
       id: crypto.randomUUID(),
       title: data.title,
@@ -71,62 +71,91 @@ export default function Task() {
       dueDate: data.dueDate,
     };
 
-    setTasks((prev) => ({
+    setTasksByBoard((prev) => ({
       ...prev,
-      [selectedBoard]: [...prev[selectedBoard], newTask],
+      [selectedBoardId]: [...(prev[selectedBoardId] ?? []), newTask],
     }));
 
     setActiveTaskId(newTask.id);
   };
+
+  /**
+   * 🔹 handleDeleteTask
+   * TODO:
+   * - Call deleteTask mutation
+   * - Remove from backend
+   */
+  const handleDeleteTask = (taskId: string) => {
+    if (!selectedBoardId) return;
+
+    setTasksByBoard((prev) => ({
+      ...prev,
+      [selectedBoardId]: (prev[selectedBoardId] ?? []).filter(
+        (task) => task.id !== taskId,
+      ),
+    }));
+
+    if (activeTaskId === taskId) {
+      setActiveTaskId(null);
+    }
+  };
+
+  /**
+   * 🔹 handleDuplicateTask
+   * TODO:
+   * - Ideally create duplicate via backend
+   */
+  const handleDuplicateTask = (taskId: string) => {
+    if (!selectedBoardId) return;
+
+    const taskToCopy = boardTasks.find((t) => t.id === taskId);
+    if (!taskToCopy) return;
+
+    const copy: TaskItem = {
+      ...taskToCopy,
+      id: crypto.randomUUID(),
+      title: taskToCopy.title + " (Copy)",
+    };
+
+    setTasksByBoard((prev) => ({
+      ...prev,
+      [selectedBoardId]: [...(prev[selectedBoardId] ?? []), copy],
+    }));
+  };
+
+  /**
+   * 🔹 handleUpdateTask
+   * TODO:
+   * - Open update dialog
+   * - Or call updateTask mutation
+   */
+  const handleUpdateTask = (taskId: string) => {
+    console.log("Open update dialog for:", taskId);
+  };
+
+  // ============================================================
+  // ======================== RENDER ============================
+  // ============================================================
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="relative min-h-screen flex flex-col bg-neutral-900 text-white overflow-hidden"
+      className="relative min-h-screen flex flex-col bg-neutral-900 text-white"
     >
-      {/* Glow background */}
-      <div className="absolute inset-0 -z-0 pointer-events-none">
-        {[...Array(4)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full blur-3xl opacity-10"
-            style={{
-              width: `${220 + i * 60}px`,
-              height: `${220 + i * 60}px`,
-              background:
-                "radial-gradient(circle, oklch(0.6 0.24 293.9), transparent 40%)",
-              top: `${10 + i * 20}%`,
-              left: `${5 + i * 25}%`,
-            }}
-            animate={{
-              x: [0, 30, -30, 0],
-              y: [0, -20, 20, 0],
-              scale: [1, 1.05, 0.98, 1],
-            }}
-            transition={{
-              duration: 18 + i * 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-      {/* Header */}
+      {/* ================= HEADER ================= */}
       <TaskHeader
         boards={boards}
-        selectedBoard={selectedBoard}
-        onBoardChange={setSelectedBoard}
+        selectedBoardId={selectedBoardId}
+        onBoardChange={setSelectedBoardId}
         onAssignClick={() => setOpenDialog(true)}
       />
 
-      {/* Body */}
+      {/* ================= BODY ================= */}
       <main className="flex-1 p-6 space-y-4">
-        {/* ✅ Task Action Menu — uses selected task */}
-
         <TaskBody
-          tasks={tasks[selectedBoard]}
+          tasks={boardTasks}
           activeTaskId={activeTaskId}
           onTaskSelect={setActiveTaskId}
           onAssignClick={() => setOpenDialog(true)}
@@ -136,7 +165,7 @@ export default function Task() {
         />
       </main>
 
-      {/* Assign Task Dialog */}
+      {/* ================= DIALOG ================= */}
       <AssignTaskDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}

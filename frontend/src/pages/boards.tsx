@@ -1,6 +1,6 @@
 // what is happening in this file on first time when use enter the board page a simple page is show with one card here is used temporary data and function which is clicked when user want to create board and create a new board that return outside
 // src/components/Board.tsx
-import { useState } from "react";
+import {  useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Card,
@@ -25,6 +25,7 @@ import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
 import type { Board, CreateBoardType } from "@/types/BoardTypes";
 import CreateBoard from "@/components/createBoard";
 import {
+  
   useAddBoardMutation,
   useDeleteBoardMutation,
 } from "@/features/board/boardSlice";

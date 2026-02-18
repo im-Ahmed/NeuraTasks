@@ -1,6 +1,5 @@
 import type { ApiResponse } from "@/types/generalTypes";
 import type { User } from "@/types/UserTypes";
-import { createSlice } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 type LoginResponse = ApiResponse<{
@@ -11,17 +10,9 @@ type UserProfileResponse = ApiResponse<{
   user: Partial<User>;
 }>;
 export type AllUserResponse = ApiResponse<{
-  users: Array<Partial<User>>
-}>
-export type AuthState = {
-  isAdmin: boolean;
-  user: Partial<User> | null;
-};
+  users: Array<Partial<User>>;
+}>;
 
-const initialState: AuthState = {
-  isAdmin: false,
-  user: null,
-};
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/api/v1/users" }),
@@ -71,28 +62,11 @@ export const userApi = createApi({
   }),
 });
 
-export const authSlice = createSlice({
-  name: "auth",
-  initialState,
-  reducers: {
-    setAuth(state, action: { payload: AuthState }) {
-      state.isAdmin = action.payload.isAdmin;
-      state.user = action.payload.user;
-    },
-    clearAuth(state) {
-      state.isAdmin = false;
-      state.user = null;
-    },
-  },
-});
-
-export const { setAuth, clearAuth } = authSlice.actions;
-export default authSlice.reducer;
 export const {
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,
   useDeleteUserMutation,
   useGetUserProfileQuery,
-  useGetAllUserQuery
+  useGetAllUserQuery,
 } = userApi;

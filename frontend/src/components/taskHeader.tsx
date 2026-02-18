@@ -10,21 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface Board {
-  id: string;
-  name: string;
-}
+import type { Board } from "@/types/BoardTypes";
 
 interface Props {
   boards: Board[];
-  selectedBoard: string;
+  selectedBoardId: string | undefined;
   onBoardChange: (id: string) => void;
   onAssignClick: () => void;
 }
 export function TaskHeader({
   boards,
-  selectedBoard,
+  selectedBoardId,
   onBoardChange,
   onAssignClick,
 }: Props) {
@@ -56,17 +52,17 @@ export function TaskHeader({
           className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto"
         >
           {/* Board Select */}
-          <Select value={selectedBoard} onValueChange={onBoardChange}>
-            <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-sm font-medium border-white/10 bg-white/5 text-white/90">
+          <Select
+            value={selectedBoardId ?? undefined}
+            onValueChange={onBoardChange}
+          >
+            <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-sm font-medium border-white/10 bg-white/5">
               <SelectValue placeholder="Select Board" />
             </SelectTrigger>
-            <SelectContent className="border-indigo-100">
+            <SelectContent className="border-indigo-100 ">
               {boards.map((board) => (
-                <SelectItem
-                  key={board.id}
-                  value={board.id}
-                >
-                  {board.name}
+                <SelectItem key={board._id} value={board._id as string}>
+                  {board.title}
                 </SelectItem>
               ))}
             </SelectContent>
