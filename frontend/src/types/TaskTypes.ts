@@ -17,11 +17,11 @@ export type Member = {
 export type Task = {
   title: string;
   description: string;
-  board: string;
-  priority: TaskPriority;
-  status: TaskStatus;
+  boardId: string;
+  priority: string;
+  status: string;
   dueDate: string;
-  assignedTo: string[] | Member[];
+  assignedTo: (Member | string)[];
   _id: string;
   createdAt: string;
   updatedAt: string;

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import {
@@ -17,28 +17,22 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
-import { EllipsisVertical, Trash2, Pencil, Copy } from "lucide-react";
-
-interface TaskLite {
-  id: string;
-  title: string;
-}
+import { EllipsisVertical, Trash2, Pencil } from "lucide-react";
+import type { Task } from "@/types/TaskTypes";
 
 interface Props {
-  selectedTask: TaskLite | null;
+  selectedTask: Task | null;
   onDelete: (id: string) => void;
   onUpdate: (id: string) => void;
-  onDuplicate: (id: string) => void;
 }
 
 export default function TaskActionMenu({
   selectedTask,
   onDelete,
   onUpdate,
-  onDuplicate,
 }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const disabled = !selectedTask;
@@ -48,18 +42,18 @@ export default function TaskActionMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <motion.div
-              // whileHover={{ rotate: 90 }}
-              // transition={{ duration: 0.2 }}
-              // className="flex-1 sm:flex-none"
+          // whileHover={{ rotate: 90 }}
+          // transition={{ duration: 0.2 }}
+          // className="flex-1 sm:flex-none"
+          >
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-10 w-full sm:w-10 text-indigo-600 hover:bg-indigo-50"
             >
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-10 w-full sm:w-10 text-indigo-600 hover:bg-indigo-50"
-              >
-                <EllipsisVertical />
-              </Button>
-            </motion.div>
+              <EllipsisVertical />
+            </Button>
+          </motion.div>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-44">
@@ -68,20 +62,11 @@ export default function TaskActionMenu({
 
           <DropdownMenuItem
             disabled={disabled}
-            onClick={() => selectedTask && onUpdate(selectedTask.id)}
+            onClick={() => selectedTask && onUpdate(selectedTask._id)}
             className="gap-2"
           >
             <Pencil className="h-4 w-4" />
             Update
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            disabled={disabled}
-            onClick={() => selectedTask && onDuplicate(selectedTask.id)}
-            className="gap-2"
-          >
-            <Copy className="h-4 w-4" />
-            Duplicate
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -107,7 +92,8 @@ export default function TaskActionMenu({
           <p className="text-sm text-muted-foreground">
             Are you sure you want to delete
             <span className="font-semibold text-red-500">
-              {" "}{selectedTask?.title}
+              {" "}
+              {selectedTask?.title}
             </span>
             ?
           </p>
@@ -120,7 +106,7 @@ export default function TaskActionMenu({
             <Button
               variant="destructive"
               onClick={() => {
-                if (selectedTask) onDelete(selectedTask.id);
+                if (selectedTask) onDelete(selectedTask._id);
                 setConfirmOpen(false);
               }}
             >

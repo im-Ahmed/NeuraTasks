@@ -5,25 +5,25 @@ import { ListChecks, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TaskActionMenu from "../components/taskActionMenu";
+import type { Task, Member } from "@/types/TaskTypes";
 
 export interface TaskItem {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   status: string;
-  assignee: string;
-  dueDate?: String;
+  assignedTo: (Member | string)[];
+  dueDate?: string;
 }
 
 interface Props {
-  tasks: TaskItem[];
+  tasks: Task[];
   activeTaskId: string | null;
   onTaskSelect: (id: string) => void;
   onAssignClick: () => void;
 
   // ✅ actions for menu
   onDeleteTask: (id: string) => void;
-  onDuplicateTask: (id: string) => void;
   onUpdateTask: (id: string) => void;
 }
 
@@ -33,10 +33,9 @@ export function TaskBody({
   onTaskSelect,
   onAssignClick,
   onDeleteTask,
-  onDuplicateTask,
   onUpdateTask,
 }: Props) {
-  const activeTask = tasks.find((t) => t.id === activeTaskId);
+  const activeTask = tasks.find((t) => t._id === activeTaskId);
 
   if (tasks.length === 0) {
     return (
@@ -76,10 +75,10 @@ export function TaskBody({
         </h4>
         {tasks.map((task) => (
           <motion.div
-            key={task.id}
-            onClick={() => onTaskSelect(task.id)}
-            className={`relative min-w-[200px] cursor-pointer rounded-lg border bg-white/5 p-4 m-2 ${
-              task.id === activeTaskId
+            key={task._id}
+            onClick={() => onTaskSelect(task._id)}
+            className={`relative min-w-50 cursor-pointer rounded-lg border bg-white/5 p-4 m-2 ${
+              task._id === activeTaskId
                 ? "border-white/30 ring-1 ring-[oklch(0.6_0.24_293.9)]/30"
                 : "border-white/10"
             }`}
@@ -91,7 +90,6 @@ export function TaskBody({
               <TaskActionMenu
                 selectedTask={task} // ✅ pass the current task here
                 onDelete={onDeleteTask}
-                onDuplicate={onDuplicateTask}
                 onUpdate={onUpdateTask}
               />
             </div>
@@ -144,7 +142,12 @@ export function TaskBody({
               <h4 className="font-semibold text-white mb-2">Status</h4>
               <p className="font-medium text-white">{activeTask.status}</p>
               <p className="text-sm mt-2 text-white/70">
-                Assigned to: {activeTask.assignee}
+                Assigned to:{" "}
+                {Array.isArray(activeTask.assignedTo)
+                  ? activeTask.assignedTo
+                      .map((a) => (typeof a === "string" ? a : a.username))
+                      .join(", ")
+                  : "Unassigned"}
               </p>
             </motion.div>
           </div>

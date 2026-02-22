@@ -152,4 +152,4 @@ export const taskFetching = createApi({
   }),
 });
 
-export const { useGetUserTasksQuery, useGetBoardTasksQuery } = taskFetching;
+export const { useGetUserTasksQuery, useGetBoardTasksQuery , useLazyGetBoardTasksQuery} = taskFetching;

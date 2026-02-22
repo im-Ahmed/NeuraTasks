@@ -4,6 +4,7 @@ import { commentApi } from "@/features/comments/commentSlice";
 import { commentFetching } from "@/features/comments/realTimeCommentFetching";
 import { logApi } from "@/features/log/logSlice";
 import { logFetching } from "@/features/log/realTimeLogFetching";
+import { taskFetching } from "@/features/task/realTimeTaskFetching";
 import { taskApi } from "@/features/task/taskSlice";
 import { userApi } from "@/features/user/userSlice";
 import { configureStore } from "@reduxjs/toolkit";
@@ -12,6 +13,7 @@ import { configureStore } from "@reduxjs/toolkit";
 export const store = configureStore({
   reducer: {
     [userApi.reducerPath]: userApi.reducer,
+    [taskFetching.reducerPath]: taskFetching.reducer,
     [boardApi.reducerPath]: boardApi.reducer,
     [boardFetching.reducerPath]: boardFetching.reducer,
     [logApi.reducerPath]: logApi.reducer,
@@ -29,7 +31,8 @@ export const store = configureStore({
       .concat(taskApi.middleware)
       .concat(commentApi.middleware)
       .concat(commentFetching.middleware)
-      .concat(userApi.middleware),
+      .concat(userApi.middleware)
+      .concat(taskFetching.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

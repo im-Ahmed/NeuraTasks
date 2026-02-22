@@ -18,7 +18,7 @@ interface Props {
   onBoardChange: (id: string) => void;
   onAssignClick: () => void;
 }
-export function TaskHeader({
+export function  TaskHeader({
   boards,
   selectedBoardId,
   onBoardChange,
@@ -54,7 +54,7 @@ export function TaskHeader({
           {/* Board Select */}
           <Select
             value={selectedBoardId ?? undefined}
-            onValueChange={onBoardChange}
+            onValueChange={(value) => onBoardChange(value)}
           >
             <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-sm font-medium border-white/10 bg-white/5">
               <SelectValue placeholder="Select Board" />

@@ -10,7 +10,7 @@ const createTask = asyncHandler(async (req, res, _) => {
   const {
     title,
     description,
-    board: boardId,
+    boardId,
     assignedTo: userIds,
     priority,
     status,
@@ -29,7 +29,7 @@ const createTask = asyncHandler(async (req, res, _) => {
   }
   ValidateId(boardId);
   // validate each id and also mapped into ObjectId
-  const members = userIds.map((u_id) => {
+  const members = userIds?.map((u_id) => {
     ValidateId(u_id);
     return new mongoose.Types.ObjectId(u_id);
   });

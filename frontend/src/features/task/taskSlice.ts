@@ -8,7 +8,7 @@ export const taskApi = createApi({
   endpoints: (build) => ({
     addTask: build.mutation<ApiResponse<Task>, Partial<Task>>({
       query: (body) => ({
-        url: "create",
+        url: "/create",
         method: "POST",
         body,
       }),

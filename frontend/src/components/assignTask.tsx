@@ -20,12 +20,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
+import type { BoardMember } from "@/types/BoardTypes";
+import type { Task } from "@/types/TaskTypes";
 
 const schema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  assignee: z.string().min(1, "Assignee is required"),
+  assignedTo: z.array(z.string()).min(1, "At least one assignee required"),
   dueDate: z.string().optional(),
+  status: z.enum(["TODO", "IN-PROGRESS", "DONE", "BLOCKED"]),
+  priority: z.enum(["HIGH", "LOW", "NORMAL"]),
 });
 
 export type AssignTaskValues = z.infer<typeof schema>;
@@ -33,21 +38,30 @@ export type AssignTaskValues = z.infer<typeof schema>;
 interface Props {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: AssignTaskValues) => void;
+  onCreate: (data: Partial<Task>) => void;
+  currentMembers: BoardMember[];
 }
 
-export function AssignTaskDialog({ open, onClose, onCreate }: Props) {
+export function AssignTaskDialog({
+  open,
+  onClose,
+  onCreate,
+  currentMembers,
+}: Props) {
+  useGetAllBoardQuery();
   const form = useForm<AssignTaskValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: "",
       description: "",
-      assignee: "",
+      assignedTo: [],
       dueDate: "",
+      status: "TODO",
+      priority: "NORMAL",
     },
   });
 
-  const submit = (data: AssignTaskValues) => {
+  const submit = (data: Partial<Task>) => {
     onCreate(data);
     form.reset();
     onClose();
@@ -87,7 +101,7 @@ export function AssignTaskDialog({ open, onClose, onCreate }: Props) {
                 className="h-10 sm:h-11 focus-visible:ring-[oklch(0.6_0.24_293.9)]"
               />
               {form.formState.errors.title && (
-                <p className="text-xs sm:text-sm text-red-500 break-words">
+                <p className="text-xs sm:text-sm text-red-500 wrap-break-words">
                   {form.formState.errors.title.message}
                 </p>
               )}
@@ -106,18 +120,18 @@ export function AssignTaskDialog({ open, onClose, onCreate }: Props) {
               <Textarea
                 rows={4}
                 {...form.register("description")}
-                className="min-h-[110px] sm:min-h-[130px] resize-y focus-visible:ring-[oklch(0.6_0.24_293.9)]"
+                className="min-h-27.5 sm:min-h-32.5 resize-y focus-visible:ring-[oklch(0.6_0.24_293.9)]"
               />
               {form.formState.errors.description && (
-                <p className="text-xs sm:text-sm text-red-500 break-words">
+                <p className="text-xs sm:text-sm text-red-500 wrap-break-words">
                   {form.formState.errors.description.message}
                 </p>
               )}
             </motion.div>
 
-            {/* Assignee + Due Date */}
+            {/* Assignee, Due Date, Status, Priority */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-              {/* Assignee */}
+              {/* Assignee (multi-select) */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -125,25 +139,40 @@ export function AssignTaskDialog({ open, onClose, onCreate }: Props) {
                 className="space-y-1"
               >
                 <Label className="text-white/80 text-sm sm:text-base">
-                  Assignee
+                  Assignee(s)
                 </Label>
-                <Select
-                  onValueChange={(v) =>
-                    form.setValue("assignee", v, { shouldValidate: true })
-                  }
-                >
-                  <SelectTrigger className="h-10 sm:h-11 bg-white/5 text-white focus-visible:ring-[oklch(0.6_0.24_293.9)]">
-                    <SelectValue placeholder="Select member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ahmad">Ahmad</SelectItem>
-                    <SelectItem value="Sara">Sara</SelectItem>
-                    <SelectItem value="Ali">Ali</SelectItem>
-                  </SelectContent>
-                </Select>
-                {form.formState.errors.assignee && (
-                  <p className="text-xs sm:text-sm text-red-500 break-words">
-                    {form.formState.errors.assignee.message}
+                <div className="bg-white/5 rounded-md border border-white/10 p-2 max-h-48 overflow-y-auto space-y-2">
+                  {currentMembers?.map((member) => (
+                    <label
+                      key={member._id}
+                      className="flex items-center gap-2 cursor-pointer hover:bg-white/5 p-1 rounded"
+                    >
+                      <input
+                        type="checkbox"
+                        value={member._id}
+                        checked={form.watch("assignedTo")?.includes(member._id)}
+                        onChange={(e) => {
+                          const current = form.watch("assignedTo");
+                          if (e.target.checked) {
+                            form.setValue("assignedTo", [...current, member._id]);
+                          } else {
+                            form.setValue(
+                              "assignedTo",
+                              current.filter((v) => v !== member._id),
+                            );
+                          }
+                        }}
+                        className="w-4 h-4 cursor-pointer"
+                      />
+                      <span className="text-white text-sm">
+                        {member.username}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                {form.formState.errors.assignedTo && (
+                  <p className="text-xs sm:text-sm text-red-500 wrap-break-words">
+                    {form.formState.errors.assignedTo.message}
                   </p>
                 )}
               </motion.div>
@@ -163,6 +192,70 @@ export function AssignTaskDialog({ open, onClose, onCreate }: Props) {
                   {...form.register("dueDate")}
                   className="h-10 sm:h-11 focus-visible:ring-[oklch(0.6_0.24_293.9)] bg-white/5 text-white"
                 />
+              </motion.div>
+            </div>
+
+            {/* Status and Priority */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+              {/* Status */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="space-y-1"
+              >
+                <Label className="text-white/80 text-sm sm:text-base">
+                  Status
+                </Label>
+                <Select
+                  value={form.watch("status")}
+                  onValueChange={(v: any) => form.setValue("status", v)}
+                >
+                  <SelectTrigger className="h-10 sm:h-11 bg-white/5 text-white focus-visible:ring-[oklch(0.6_0.24_293.9)]">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TODO">TODO</SelectItem>
+                    <SelectItem value="IN-PROGRESS">IN-PROGRESS</SelectItem>
+                    <SelectItem value="DONE">DONE</SelectItem>
+                    <SelectItem value="BLOCKED">BLOCKED</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.status && (
+                  <p className="text-xs sm:text-sm text-red-500 wrap-break-words">
+                    {form.formState.errors.status.message}
+                  </p>
+                )}
+              </motion.div>
+
+              {/* Priority */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="space-y-1"
+              >
+                <Label className="text-white/80 text-sm sm:text-base">
+                  Priority
+                </Label>
+                <Select
+                  value={form.watch("priority")}
+                  onValueChange={(v: any) => form.setValue("priority", v)}
+                >
+                  <SelectTrigger className="h-10 sm:h-11 bg-white/5 text-white focus-visible:ring-[oklch(0.6_0.24_293.9)]">
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NORMAL">NORMAL</SelectItem>
+                    <SelectItem value="HIGH">HIGH</SelectItem>
+                    <SelectItem value="LOW">LOW</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.priority && (
+                  <p className="text-xs sm:text-sm text-red-500 wrap-break-words">
+                    {form.formState.errors.priority.message}
+                  </p>
+                )}
               </motion.div>
             </div>
 

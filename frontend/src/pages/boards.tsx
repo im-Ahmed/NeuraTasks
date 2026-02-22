@@ -66,7 +66,7 @@ const GlowBackground = () => {
 // Generate content for each board
 const renderBoardContent = (board: Board) => (
   <>
-    <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+    <h3 className="text-2xl font-bold mb-4 bg-linear-to-r from-white to-white/70 bg-clip-text text-transparent">
       {board.title} Details
     </h3>
 
@@ -142,16 +142,16 @@ export default function Board() {
   return (
     <div className="relative min-h-screen bg-neutral-900 text-white overflow-hidden">
       {/* Animated Glow Background */}
-      <div className="absolute inset-0 -z-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <GlowBackground />
       </div>
 
       {/* Content */}
       <div className="relative z-10 grid grid-rows-[auto_1fr_auto] min-h-screen">
         {/* Header */}
-        <div className="p-6 border-b border-white/10 bg-gradient-to-r from-white/5 to-white/0">
+        <div className="p-6 border-b border-white/10 bg-linear-to-r from-white/5 to-white/0">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-linear-to-r from-white to-white/70 bg-clip-text text-transparent">
               Boards
             </h1>
             <div className="flex items-center gap-3">
@@ -205,7 +205,7 @@ export default function Board() {
                     />
                   </svg>
                 </button>
-                <DialogContent className="sm:max-w-[1200px] bg-neutral-800/50 backdrop-blur-xl border-white/10 text-white">
+                <DialogContent className="sm:max-w-300 bg-neutral-800/50 backdrop-blur-xl border-white/10 text-white">
                   <DialogHeader>
                     <DialogTitle className="text-2xl font-bold">
                       Create New Board
@@ -235,7 +235,7 @@ export default function Board() {
                 className="absolute inset-0 flex items-center justify-center"
               >
                 <Card className="w-full max-w-80 lg:max-w-lg bg-neutral-800/30 border border-white/10 rounded-xl shadow-lg backdrop-blur-xl p-8 text-center">
-                  <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold mb-4 bg-linear-to-r from-white to-white/70 bg-clip-text text-transparent">
                     No Boards Yet
                   </h2>
                   <p className="text-sm lg:text-lg text-white/60 mb-6">
@@ -319,7 +319,7 @@ export default function Board() {
                         renderBoardContent(selectedItem)
                       ) : (
                         <div className="text-center py-20">
-                          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                          <h2 className="text-3xl font-bold mb-4 bg-linear-to-r from-white to-white/70 bg-clip-text text-transparent">
                             Select a board
                           </h2>
                           <p className="text-lg text-white/60">

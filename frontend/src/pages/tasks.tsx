@@ -5,137 +5,76 @@ import { motion } from "framer-motion";
 
 import { TaskHeader } from "../components/taskHeader";
 import { TaskBody } from "../components/taskBody";
-import type { TaskItem } from "../components/taskBody";
-import type { AssignTaskValues } from "../components/assignTask";
 import { AssignTaskDialog } from "../components/assignTask";
 
 import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
+import type { BoardMember } from "@/types/BoardTypes";
+import { useAddTaskMutation } from "@/features/task/taskSlice";
+import type { Task } from "@/types/TaskTypes";
+import { useGetBoardTasksQuery } from "@/features/task/realTimeTaskFetching";
 
 export default function Task() {
-  // 🔹 Fetch dynamic boards from backend
-  const { data: allBoard } = useGetAllBoardQuery();
+  // selectedBoardId is the single source of truth for which board is active. Tasks are stored in a dictionary keyed by boardId for O(1) access and easy updates.
+  // Add task
+  const [addTask, { isError: taskCreationError }] = useAddTaskMutation();
 
-  // 🔹 Extract boards safely
-  const boards = allBoard?.data?.boards ?? [];
-
-  /**
-   * 🔹 selectedBoardId
-   * Should always be backend board.id
-   */
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>(
     undefined,
   );
+  // get all the boards for the select dropdown
+  const { data: allBoard } = useGetAllBoardQuery();
+  // Extract boards safely
+  const boards = useMemo(() => {
+    return allBoard?.data?.boards ?? [];
+  }, [allBoard]);
 
-  /**
-   * 🔹 Tasks stored dynamically per boardId
-   * Structure:
-   * {
-   *   "boardId1": TaskItem[],
-   *   "boardId2": TaskItem[]
-   * }
-   */
-  const [tasksByBoard, setTasksByBoard] = useState<Record<string, TaskItem[]>>(
-    {},
+  // Extract members safely
+  const currentBoard = useMemo(() => {
+    return boards.find((b) => b._id === selectedBoardId)?.members;
+  }, [boards, selectedBoardId]);
+
+  // Fetch tasks for the current board
+
+  const isValidObjectId = (id?: string): id is string =>
+    !!id && /^[0-9a-fA-F]{24}$/.test(id);
+
+  const { data: currentBoardTasks } = useGetBoardTasksQuery(
+    selectedBoardId as string,
+    {
+      skip: !isValidObjectId(selectedBoardId),
+    },
   );
 
   const [openDialog, setOpenDialog] = useState(false);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
-  /**
-   * 🔹 Current board tasks (safe fallback)
-   */
-  const boardTasks = useMemo(() => {
-    if (!selectedBoardId) return [];
-    return tasksByBoard[selectedBoardId] ?? [];
-  }, [selectedBoardId, tasksByBoard]);
+  //  handleCreateTask
 
-  // ============================================================
-  // ======================= HANDLERS ===========================
-  // ============================================================
-
-  /**
-   * 🔹 handleCreateTask
-   * TODO:
-   * - Option 1: Call backend mutation to create task
-   * - Option 2: Optimistically update UI
-   */
-  const handleCreateTask = (data: AssignTaskValues) => {
+  const handleCreateTask = async (data: Partial<Task>) => {
     if (!selectedBoardId) return;
+    data = { ...data, boardId: selectedBoardId };
+    console.log("Creating task with data:", data);
+    try {
+      const taskReponse = await addTask(data).unwrap();
+      const newTask = taskReponse.data;
 
-    const newTask: TaskItem = {
-      id: crypto.randomUUID(),
-      title: data.title,
-      description: data.description,
-      assignee: data.assignee,
-      status: "To Do",
-      dueDate: data.dueDate,
-    };
-
-    setTasksByBoard((prev) => ({
-      ...prev,
-      [selectedBoardId]: [...(prev[selectedBoardId] ?? []), newTask],
-    }));
-
-    setActiveTaskId(newTask.id);
-  };
-
-  /**
-   * 🔹 handleDeleteTask
-   * TODO:
-   * - Call deleteTask mutation
-   * - Remove from backend
-   */
-  const handleDeleteTask = (taskId: string) => {
-    if (!selectedBoardId) return;
-
-    setTasksByBoard((prev) => ({
-      ...prev,
-      [selectedBoardId]: (prev[selectedBoardId] ?? []).filter(
-        (task) => task.id !== taskId,
-      ),
-    }));
-
-    if (activeTaskId === taskId) {
-      setActiveTaskId(null);
+      setActiveTaskId(newTask._id);
+    } catch (err) {
+      console.log("Error creating task:", taskCreationError || err);
     }
   };
 
-  /**
-   * 🔹 handleDuplicateTask
-   * TODO:
-   * - Ideally create duplicate via backend
-   */
-  const handleDuplicateTask = (taskId: string) => {
-    if (!selectedBoardId) return;
+  // handleDeleteTask
 
-    const taskToCopy = boardTasks.find((t) => t.id === taskId);
-    if (!taskToCopy) return;
-
-    const copy: TaskItem = {
-      ...taskToCopy,
-      id: crypto.randomUUID(),
-      title: taskToCopy.title + " (Copy)",
-    };
-
-    setTasksByBoard((prev) => ({
-      ...prev,
-      [selectedBoardId]: [...(prev[selectedBoardId] ?? []), copy],
-    }));
+  const handleDeleteTask = (taskId: string) => {
+    console.log("Delete id", taskId);
   };
 
-  /**
-   * 🔹 handleUpdateTask
-   * TODO:
-   * - Open update dialog
-   * - Or call updateTask mutation
-   */
+  // handleUpdateTask
+
   const handleUpdateTask = (taskId: string) => {
     console.log("Open update dialog for:", taskId);
   };
-
-  // ============================================================
-  // ======================== RENDER ============================
-  // ============================================================
 
   return (
     <motion.div
@@ -154,15 +93,17 @@ export default function Task() {
 
       {/* ================= BODY ================= */}
       <main className="flex-1 p-6 space-y-4">
-        <TaskBody
+        {/* <TaskBody
           tasks={boardTasks}
           activeTaskId={activeTaskId}
           onTaskSelect={setActiveTaskId}
           onAssignClick={() => setOpenDialog(true)}
           onDeleteTask={handleDeleteTask}
-          onDuplicateTask={handleDuplicateTask}
           onUpdateTask={handleUpdateTask}
-        />
+        /> */}
+        {currentBoardTasks?.data?.tasks.map((desc) => (
+          <div key={desc._id}>{desc.description}</div>
+        ))}
       </main>
 
       {/* ================= DIALOG ================= */}
@@ -170,6 +111,7 @@ export default function Task() {
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         onCreate={handleCreateTask}
+        currentMembers={currentBoard as BoardMember[]}
       />
     </motion.div>
   );
