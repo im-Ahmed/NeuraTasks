@@ -12,6 +12,7 @@ export enum TaskPriority {
 export type Member = {
   _id: string;
   username: string;
+  name:string;
   avatar: string;
 };
 export type Task = {

@@ -54,11 +54,15 @@ const createTask = asyncHandler(async (req, res, _) => {
   if (!task) {
     throw new ApiError(500, "Failed or assign task");
   }
+  const populatedTask = await Task.findById(task._id).populate(
+    "assignedTo",
+    "_id username name avatar"
+  );
   // notify assigned users about new task
-  broadcast({ type: "TASK_CREATED", task });
+  broadcast({ type: "TASK_CREATED", task: populatedTask });
   return res
     .status(200)
-    .json(new ApiResponse(200, { task }, "Task created successfully"));
+    .json(new ApiResponse(200,  populatedTask , "Task created successfully"));
 });
 const deleteTask = asyncHandler(async (req, res, _) => {
   const { taskId } = req.params;
@@ -93,6 +97,7 @@ const allTasks = asyncHandler(async (req, res, _) => {
           {
             $project: {
               username: 1,
+              name: 1,
               avatar: 1,
             },
           },

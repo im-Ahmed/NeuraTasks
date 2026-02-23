@@ -42,21 +42,20 @@ export default function TaskActionMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <motion.div
-          // whileHover={{ rotate: 90 }}
-          // transition={{ duration: 0.2 }}
-          // className="flex-1 sm:flex-none"
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.2 }}
           >
             <Button
               size="icon"
               variant="ghost"
-              className="h-10 w-full sm:w-10 text-indigo-600 hover:bg-indigo-50"
+              className="h-10 w-full sm:w-10 "
             >
               <EllipsisVertical />
             </Button>
           </motion.div>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuLabel>Task Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 

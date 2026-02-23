@@ -9,7 +9,10 @@ import { AssignTaskDialog } from "../components/assignTask";
 
 import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
 import type { BoardMember } from "@/types/BoardTypes";
-import { useAddTaskMutation } from "@/features/task/taskSlice";
+import {
+  useAddTaskMutation,
+  useDeleteTaskMutation,
+} from "@/features/task/taskSlice";
 import type { Task } from "@/types/TaskTypes";
 import { useGetBoardTasksQuery } from "@/features/task/realTimeTaskFetching";
 
@@ -17,6 +20,8 @@ export default function Task() {
   // selectedBoardId is the single source of truth for which board is active. Tasks are stored in a dictionary keyed by boardId for O(1) access and easy updates.
   // Add task
   const [addTask, { isError: taskCreationError }] = useAddTaskMutation();
+  // delete task
+  const [deleteTask, { isError: taskDeletionError }] = useDeleteTaskMutation();
 
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>(
     undefined,
@@ -33,17 +38,15 @@ export default function Task() {
     return boards.find((b) => b._id === selectedBoardId)?.members;
   }, [boards, selectedBoardId]);
 
-  // Fetch tasks for the current board
-
+  // validate selectedBoardId before fetching tasks to avoid unnecessary API calls and potential errors. This ensures that we only attempt to fetch tasks when we have a valid board ID, which should be a 24-character hexadecimal string (typical for MongoDB ObjectIDs).
   const isValidObjectId = (id?: string): id is string =>
     !!id && /^[0-9a-fA-F]{24}$/.test(id);
 
-  const { data: currentBoardTasks } = useGetBoardTasksQuery(
-    selectedBoardId as string,
-    {
+  // Fetch tasks for the current board only if selectedBoardId is valid. This prevents the query from running with an invalid ID, which could lead to errors or unnecessary API calls.
+  const { data: currentBoardTasks, isLoading: boardTasksLoading } =
+    useGetBoardTasksQuery(selectedBoardId as string, {
       skip: !isValidObjectId(selectedBoardId),
-    },
-  );
+    });
 
   const [openDialog, setOpenDialog] = useState(false);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
@@ -53,12 +56,9 @@ export default function Task() {
   const handleCreateTask = async (data: Partial<Task>) => {
     if (!selectedBoardId) return;
     data = { ...data, boardId: selectedBoardId };
-    console.log("Creating task with data:", data);
     try {
-      const taskReponse = await addTask(data).unwrap();
-      const newTask = taskReponse.data;
-
-      setActiveTaskId(newTask._id);
+      const testResponse = await addTask(data).unwrap();
+      setActiveTaskId(testResponse.data._id || null);
     } catch (err) {
       console.log("Error creating task:", taskCreationError || err);
     }
@@ -67,7 +67,11 @@ export default function Task() {
   // handleDeleteTask
 
   const handleDeleteTask = (taskId: string) => {
-    console.log("Delete id", taskId);
+    try {
+      deleteTask(taskId);
+    } catch (err) {
+      console.log("Error deleting task:", taskDeletionError || err);
+    }
   };
 
   // handleUpdateTask
@@ -83,30 +87,33 @@ export default function Task() {
       exit={{ opacity: 0 }}
       className="relative min-h-screen flex flex-col bg-neutral-900 text-white"
     >
-      {/* ================= HEADER ================= */}
+      {/* Header */}
       <TaskHeader
         boards={boards}
         selectedBoardId={selectedBoardId}
         onBoardChange={setSelectedBoardId}
         onAssignClick={() => setOpenDialog(true)}
       />
+      {/* Body */}
+      {}
+      {boardTasksLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="loader">loading</div>
+        </div>
+      ) : (
+        <main className="flex-1 p-6 space-y-4">
+          <TaskBody
+            tasks={currentBoardTasks?.data?.tasks || []}
+            activeTaskId={activeTaskId}
+            onTaskSelect={setActiveTaskId}
+            onAssignClick={() => setOpenDialog(true)}
+            onDeleteTask={handleDeleteTask}
+            onUpdateTask={handleUpdateTask}
+          />
+        </main>
+      )}
 
-      {/* ================= BODY ================= */}
-      <main className="flex-1 p-6 space-y-4">
-        {/* <TaskBody
-          tasks={boardTasks}
-          activeTaskId={activeTaskId}
-          onTaskSelect={setActiveTaskId}
-          onAssignClick={() => setOpenDialog(true)}
-          onDeleteTask={handleDeleteTask}
-          onUpdateTask={handleUpdateTask}
-        /> */}
-        {currentBoardTasks?.data?.tasks.map((desc) => (
-          <div key={desc._id}>{desc.description}</div>
-        ))}
-      </main>
-
-      {/* ================= DIALOG ================= */}
+      {/* DIALOG */}
       <AssignTaskDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}

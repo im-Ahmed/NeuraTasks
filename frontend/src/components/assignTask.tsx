@@ -28,7 +28,12 @@ const schema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   assignedTo: z.array(z.string()).min(1, "At least one assignee required"),
-  dueDate: z.string().optional(),
+  dueDate: z
+    .string()
+    .min(1, "Due date is required")
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Invalid date",
+    }),
   status: z.enum(["TODO", "IN-PROGRESS", "DONE", "BLOCKED"]),
   priority: z.enum(["HIGH", "LOW", "NORMAL"]),
 });
@@ -152,13 +157,21 @@ export function AssignTaskDialog({
                         value={member._id}
                         checked={form.watch("assignedTo")?.includes(member._id)}
                         onChange={(e) => {
-                          const current = form.watch("assignedTo");
+                          const current = form.getValues("assignedTo") || [];
+
                           if (e.target.checked) {
-                            form.setValue("assignedTo", [...current, member._id]);
+                            form.setValue(
+                              "assignedTo",
+                              [...current, member._id],
+                              {
+                                shouldValidate: true,
+                              },
+                            );
                           } else {
                             form.setValue(
                               "assignedTo",
                               current.filter((v) => v !== member._id),
+                              { shouldValidate: true },
                             );
                           }
                         }}

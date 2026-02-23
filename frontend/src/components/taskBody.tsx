@@ -5,16 +5,15 @@ import { ListChecks, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TaskActionMenu from "../components/taskActionMenu";
-import type { Task, Member } from "@/types/TaskTypes";
+import type { Task } from "@/types/TaskTypes";
 
-export interface TaskItem {
-  _id: string;
-  title: string;
-  description: string;
-  status: string;
-  assignedTo: (Member | string)[];
-  dueDate?: string;
-}
+const formatDate = (iso: string) => {
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 interface Props {
   tasks: Task[];
@@ -25,6 +24,8 @@ interface Props {
   // ✅ actions for menu
   onDeleteTask: (id: string) => void;
   onUpdateTask: (id: string) => void;
+
+
 }
 
 export function TaskBody({
@@ -35,7 +36,9 @@ export function TaskBody({
   onDeleteTask,
   onUpdateTask,
 }: Props) {
+  // console.log("Active Task ID:", activeTaskId);
   const activeTask = tasks.find((t) => t._id === activeTaskId);
+  // console.log("Active Task Details:", activeTask);
 
   if (tasks.length === 0) {
     return (
@@ -77,12 +80,11 @@ export function TaskBody({
           <motion.div
             key={task._id}
             onClick={() => onTaskSelect(task._id)}
-            className={`relative min-w-50 cursor-pointer rounded-lg border bg-white/5 p-4 m-2 ${
+            className={`relative w-fit min-w-60 max-w-full  cursor-pointer rounded-lg border bg-white/5 p-3 m-2 ${
               task._id === activeTaskId
                 ? "border-white/30 ring-1 ring-[oklch(0.6_0.24_293.9)]/30"
                 : "border-white/10"
             }`}
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             {/* Top-right three dots menu */}
@@ -94,7 +96,7 @@ export function TaskBody({
               />
             </div>
 
-            <h3 className="font-medium text-white">{task.title}</h3>
+            <h3 className="font-medium text-white capitalize">{task.title}</h3>
             <p className="text-sm text-white/60 line-clamp-2 mt-1">
               {task.description}
             </p>
@@ -121,13 +123,15 @@ export function TaskBody({
               {/* ✅ three dots menu at top-right */}
 
               <h4 className="font-semibold text-white mb-2">Task Details</h4>
-              <p className="font-medium text-white">{activeTask.title}</p>
+              <p className="font-medium text-white capitalize">
+                {activeTask.title}
+              </p>
               <p className="text-sm text-white/60 mt-2">
                 {activeTask.description}
               </p>
               {activeTask.dueDate && (
                 <p className="mt-2 text-sm text-white/70">
-                  Due: {activeTask.dueDate}
+                  Due Date : {formatDate(activeTask.dueDate)}
                 </p>
               )}
             </motion.div>
@@ -139,16 +143,48 @@ export function TaskBody({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h4 className="font-semibold text-white mb-2">Status</h4>
-              <p className="font-medium text-white">{activeTask.status}</p>
-              <p className="text-sm mt-2 text-white/70">
-                Assigned to:{" "}
-                {Array.isArray(activeTask.assignedTo)
-                  ? activeTask.assignedTo
-                      .map((a) => (typeof a === "string" ? a : a.username))
-                      .join(", ")
-                  : "Unassigned"}
-              </p>
+              <div className="flex flex-col justify-between items-start h-full p-2">
+                <div className="flex">
+                  Status :{" "}
+                  <p className="font-medium text-white"> {activeTask.status}</p>
+                </div>
+                <div className="flex">
+                  Priority :{" "}
+                  <p className="font-medium text-white">
+                    {activeTask.priority}
+                  </p>
+                </div>
+                <div className=" flex items-end gap-2">
+                  <h4 className="text-lg font-semibold mb-2">Assigned To :</h4>
+
+                  <div className="flex flex-wrap gap-3">
+                    {Array.isArray(activeTask.assignedTo) &&
+                    activeTask.assignedTo.length > 0 ? (
+                      activeTask.assignedTo.map((assignee) =>
+                        typeof assignee === "string" ? (
+                          assignee
+                        ) : (
+                          <span
+                            key={assignee._id}
+                            className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full"
+                          >
+                            <img
+                              src={assignee.avatar}
+                              alt={assignee.name}
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                            <span className="text-sm">{assignee.name}</span>
+                          </span>
+                        ),
+                      )
+                    ) : (
+                      <p className="text-sm mb-2.5 text-white/60">
+                        No assignees
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </div>
 
@@ -171,13 +207,7 @@ export function TaskBody({
                 placeholder="Message..."
                 className="focus:ring-white text-white"
               />
-              <Button
-                style={{
-                  backgroundColor: "oklch(0.6 0.24 293.9)",
-                }}
-                size="icon"
-                className="bg-[oklch(0.6 0.24 293.9)] hover:bg-indigo-700 text-white"
-              >
+              <Button size="icon" variant="outline" className="bg-transparent">
                 →
               </Button>
             </div>
