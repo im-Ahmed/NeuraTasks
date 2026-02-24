@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useGetUserProfileQuery } from "@/features/user/userSlice";
+import Loader from "@/components/ui/loader";
 
 export default function ProtectedRoute({
   children,
@@ -14,8 +15,8 @@ export default function ProtectedRoute({
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
+      <div className="flex items-center bg-gray-950 justify-center h-screen">
+        <Loader />
       </div>
     );
   }

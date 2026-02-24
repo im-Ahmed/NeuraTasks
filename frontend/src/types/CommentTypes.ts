@@ -6,7 +6,7 @@ type CommentUser = {
 export type Comment = {
   task: string;
   message: string;
-  commentBY: string | CommentUser;
+  commentBY: CommentUser;
   _id: string;
   createdAt: string;
   updatedAt: string;

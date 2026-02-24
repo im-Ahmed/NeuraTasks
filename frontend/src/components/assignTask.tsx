@@ -33,7 +33,19 @@ const schema = z.object({
     .min(1, "Due date is required")
     .refine((val) => !isNaN(Date.parse(val)), {
       message: "Invalid date",
-    }),
+    })
+    .refine(
+      (date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const due = new Date(date);
+        due.setHours(0, 0, 0, 0);
+        return due >= today;
+      },
+      {
+        message: "Due date can't be in the past or today",
+      },
+    ),
   status: z.enum(["TODO", "IN-PROGRESS", "DONE", "BLOCKED"]),
   priority: z.enum(["HIGH", "LOW", "NORMAL"]),
 });
@@ -205,6 +217,9 @@ export function AssignTaskDialog({
                   {...form.register("dueDate")}
                   className="h-10 sm:h-11 focus-visible:ring-[oklch(0.6_0.24_293.9)] bg-white/5 text-white"
                 />
+                <p className="text-xs sm:text-sm text-red-500 wrap-break-words">
+                  {form.formState.errors.dueDate?.message}
+                </p>
               </motion.div>
             </div>
 

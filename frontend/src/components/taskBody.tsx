@@ -5,7 +5,12 @@ import { ListChecks, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TaskActionMenu from "../components/taskActionMenu";
+import { CommentActionMenu } from "./commentActionMenu";
 import type { Task } from "@/types/TaskTypes";
+import { useGetCommentQuery } from "@/features/comments/realTimeCommentFetching";
+import { useMemo } from "react";
+import { isValidObjectId } from "@/pages/tasks";
+import Loader from "./ui/loader";
 
 const formatDate = (iso: string) => {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -24,8 +29,6 @@ interface Props {
   // ✅ actions for menu
   onDeleteTask: (id: string) => void;
   onUpdateTask: (id: string) => void;
-
-
 }
 
 export function TaskBody({
@@ -36,9 +39,20 @@ export function TaskBody({
   onDeleteTask,
   onUpdateTask,
 }: Props) {
-  // console.log("Active Task ID:", activeTaskId);
-  const activeTask = tasks.find((t) => t._id === activeTaskId);
-  // console.log("Active Task Details:", activeTask);
+  let activeTask = tasks.find((t) => t._id === activeTaskId);
+  if (!activeTask) activeTask = tasks[0];
+  // get comments for active task
+  const { data: allComments, isLoading: commentLoading } = useGetCommentQuery(
+    activeTask?._id as string,
+    {
+      skip: !isValidObjectId(activeTask?._id),
+    },
+  );
+
+  const activeTaskComments = useMemo(
+    () => allComments?.data.comments,
+    [allComments],
+  );
 
   if (tasks.length === 0) {
     return (
@@ -49,7 +63,7 @@ export function TaskBody({
         transition={{ duration: 0.4 }}
       >
         <ListChecks className="h-16 w-16 text-white/40" />
-        <p className="text-white text-lg font-medium">No tasks available</p>
+        <p className="text-white text-lg font-medium">No tasks on this board</p>
         <Button
           onClick={onAssignClick}
           className="text-white"
@@ -130,8 +144,11 @@ export function TaskBody({
                 {activeTask.description}
               </p>
               {activeTask.dueDate && (
-                <p className="mt-2 text-sm text-white/70">
-                  Due Date : {formatDate(activeTask.dueDate)}
+                <p className="mt-2 text-sm  text-white/70">
+                  Due Date{" "}
+                  <span className="text-white">
+                    {formatDate(activeTask.dueDate)} at 12:00 PM
+                  </span>
                 </p>
               )}
             </motion.div>
@@ -189,25 +206,103 @@ export function TaskBody({
           </div>
 
           {/* Chat Panel */}
+
           <motion.div
-            className="border border-white/10 h-[60vh] rounded-lg flex flex-col bg-white/5 p-4 shadow-sm"
+            className="relative h-[60vh] rounded-2xl flex flex-col 
+             bg-linear-to-b from-white/5 to-white/2
+             backdrop-blur-xl border border-white/10"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 }}
           >
-            <div className="p-3 border-b flex items-center gap-2 text-white font-medium">
-              <MessageSquare className="h-4 w-4" />
+            {/* Header */}
+            <div className="p-4 border-b border-white/10 flex items-center gap-3 text-white font-medium tracking-wide">
+              <div className="p-2 rounded-lg bg-indigo-500/10">
+                <MessageSquare className="h-4 w-4 text-indigo-400" />
+              </div>
               Board Chat
             </div>
-            <div className="flex-1 p-4 text-sm text-white">
-              Start discussion…
+
+            {/* Messages */}
+            <div className="flex-1 px-4 py-6 text-sm overflow-y-auto space-y-4">
+              {commentLoading ? (
+                <Loader />
+              ) : !activeTaskComments || activeTaskComments.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-white/60">
+                  <p className="text-center">Start conversation here</p>
+                </div>
+              ) : (
+                <>
+                  {activeTaskComments?.map((msg) => (
+                    <div
+                      key={msg._id}
+                      className={`flex items-end gap-3 ${
+                        msg.commentBY?._id === localStorage.getItem("UserId")
+                          ? "justify-start"
+                          : "justify-end"
+                      }`}
+                    >
+                      {msg.commentBY?._id ===
+                        localStorage.getItem("UserId") && (
+                        <img
+                          src={msg.commentBY?.avatar}
+                          alt="avatar"
+                          className="w-9 h-9 rounded-full ring-2 ring-indigo-500/30"
+                        />
+                      )}
+
+                      <div
+                        className={`relative flex items-center gap-1 group ${
+                          msg.commentBY?._id === localStorage.getItem("UserId")
+                            ? ""
+                            : "flex-row-reverse"
+                        }`}
+                      >
+                        <div
+                          className={`max-w-xs md:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed transition-all duration-200
+            ${
+              msg.commentBY?._id === localStorage.getItem("UserId")
+                ? "bg-linear-to-r cursor-pointer from-indigo-600 to-violet-600 text-white rounded-bl-none shadow-lg "
+                : "bg-white/10 text-gray-200 rounded-br-none backdrop-blur-md"
+            }`}
+                        >
+                          {msg.message}
+                        </div>
+
+                        {msg.commentBY?._id ===
+                          localStorage.getItem("UserId") && (
+                          <span className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <CommentActionMenu commentId={msg._id} />
+                          </span>
+                        )}
+                      </div>
+
+                      {msg.commentBY?._id != localStorage.getItem("UserId") && (
+                        <img
+                          src={msg.commentBY.avatar}
+                          alt="avatar"
+                          className="w-9 h-9 rounded-full ring-2 ring-indigo-500/30"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
-            <div className="p-3 border-t flex gap-2">
+
+            {/* Input */}
+            <div className="p-3 border-t border-white/10 flex gap-3 bg-white/2 backdrop-blur-md">
               <Input
-                placeholder="Message..."
-                className="focus:ring-white text-white"
+                placeholder="Type a message..."
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-400
+                 rounded-sm"
               />
-              <Button size="icon" variant="outline" className="bg-transparent">
+              <Button
+                size="icon"
+                className="bg-linear-to-r from-indigo-600 to-violet-600
+                 hover:scale-105 transition-all duration-200
+                 rounded-sm shadow-lg shadow-indigo-500/30"
+              >
                 →
               </Button>
             </div>

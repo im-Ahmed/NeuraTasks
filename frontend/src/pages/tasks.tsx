@@ -15,7 +15,9 @@ import {
 } from "@/features/task/taskSlice";
 import type { Task } from "@/types/TaskTypes";
 import { useGetBoardTasksQuery } from "@/features/task/realTimeTaskFetching";
-
+import Loader from "@/components/ui/loader";
+export const isValidObjectId = (id?: string): id is string =>
+  !!id && /^[0-9a-fA-F]{24}$/.test(id);
 export default function Task() {
   // selectedBoardId is the single source of truth for which board is active. Tasks are stored in a dictionary keyed by boardId for O(1) access and easy updates.
   // Add task
@@ -39,8 +41,6 @@ export default function Task() {
   }, [boards, selectedBoardId]);
 
   // validate selectedBoardId before fetching tasks to avoid unnecessary API calls and potential errors. This ensures that we only attempt to fetch tasks when we have a valid board ID, which should be a 24-character hexadecimal string (typical for MongoDB ObjectIDs).
-  const isValidObjectId = (id?: string): id is string =>
-    !!id && /^[0-9a-fA-F]{24}$/.test(id);
 
   // Fetch tasks for the current board only if selectedBoardId is valid. This prevents the query from running with an invalid ID, which could lead to errors or unnecessary API calls.
   const { data: currentBoardTasks, isLoading: boardTasksLoading } =
@@ -98,7 +98,7 @@ export default function Task() {
       {}
       {boardTasksLoading ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="loader">loading</div>
+          <Loader />
         </div>
       ) : (
         <main className="flex-1 p-6 space-y-4">

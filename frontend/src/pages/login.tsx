@@ -28,6 +28,7 @@ const Login = () => {
       setLoading(true);
       const loginResponse = await loginUser(formData).unwrap();
       setLoading(false);
+      localStorage.setItem("UserId", loginResponse.data.user._id!);
       loginResponse.data.user.role === "admin"
         ? (window.location.href = "/dashboard")
         : (window.location.href = "/user-dashboard");
@@ -71,7 +72,7 @@ const Login = () => {
                 Welcome back
               </CardTitle>
               <CardDescription className="text-sm text-gray-600">
-                Sign in to continue to your workspace
+                LogIn to continue to your workspace
               </CardDescription>
             </CardHeader>
 
@@ -132,7 +133,7 @@ const Login = () => {
                       type="submit"
                       className="w-full h-9 text-sm bg-[#8a34ec] text-white font-medium transition-all duration-300 rounded-lg shadow-lg shadow-[#8a34ec]-500/20 hover:shadow-[#8a34ec]-500/40"
                     >
-                      Sign In
+                      Log In
                     </Button>
                   )}
                 </div>
