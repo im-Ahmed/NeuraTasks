@@ -8,7 +8,8 @@ import TaskActionMenu from "../components/taskActionMenu";
 import { CommentActionMenu } from "./commentActionMenu";
 import type { Task } from "@/types/TaskTypes";
 import { useGetCommentQuery } from "@/features/comments/realTimeCommentFetching";
-import { useMemo } from "react";
+import { useAddCommentMutation } from "@/features/comments/commentSlice";
+import {  useMemo, useState } from "react";
 import { isValidObjectId } from "@/pages/tasks";
 import Loader from "./ui/loader";
 
@@ -39,6 +40,8 @@ export function TaskBody({
   onDeleteTask,
   onUpdateTask,
 }: Props) {
+  const [addComment] = useAddCommentMutation();
+
   let activeTask = tasks.find((t) => t._id === activeTaskId);
   if (!activeTask) activeTask = tasks[0];
   // get comments for active task
@@ -49,11 +52,27 @@ export function TaskBody({
     },
   );
 
+  const [commentInput, setCommentInput] = useState("");
+
+ 
+  const handleSendComment = async () => {
+    if (commentInput.trim()) {
+      try {
+        await addComment({
+          taskId: activeTask?._id,
+          message: commentInput,
+        }).unwrap();
+        setCommentInput("");
+      } catch (error) {
+        console.error("Failed to add comment:", error);
+      }
+    }
+  };
+
   const activeTaskComments = useMemo(
     () => allComments?.data.comments,
     [allComments],
-  );
-
+  );  
   if (tasks.length === 0) {
     return (
       <motion.div
@@ -237,12 +256,12 @@ export function TaskBody({
                     <div
                       key={msg._id}
                       className={`flex items-end gap-3 ${
-                        msg.commentBY?._id === localStorage.getItem("UserId")
+                        msg?.commentBY?._id === localStorage.getItem("UserId")
                           ? "justify-start"
                           : "justify-end"
                       }`}
                     >
-                      {msg.commentBY?._id ===
+                      {msg?.commentBY?._id ===
                         localStorage.getItem("UserId") && (
                         <img
                           src={msg.commentBY?.avatar}
@@ -253,18 +272,19 @@ export function TaskBody({
 
                       <div
                         className={`relative flex items-center gap-1 group ${
-                          msg.commentBY?._id === localStorage.getItem("UserId")
+                          msg?.commentBY?._id === localStorage.getItem("UserId")
                             ? ""
                             : "flex-row-reverse"
                         }`}
                       >
                         <div
                           className={`max-w-xs md:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed transition-all duration-200
-            ${
-              msg.commentBY?._id === localStorage.getItem("UserId")
-                ? "bg-linear-to-r cursor-pointer from-indigo-600 to-violet-600 text-white rounded-bl-none shadow-lg "
-                : "bg-white/10 text-gray-200 rounded-br-none backdrop-blur-md"
-            }`}
+                                  ${
+                                    msg?.commentBY?._id ===
+                                    localStorage.getItem("UserId")
+                                      ? "bg-linear-to-r cursor-pointer from-indigo-600 to-violet-600 text-white rounded-bl-none shadow-lg "
+                                      : "bg-white/10 text-gray-200 rounded-br-none backdrop-blur-md"
+                                  }`}
                         >
                           {msg.message}
                         </div>
@@ -293,11 +313,15 @@ export function TaskBody({
             {/* Input */}
             <div className="p-3 border-t border-white/10 flex gap-3 bg-white/2 backdrop-blur-md">
               <Input
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSendComment()}
                 placeholder="Type a message..."
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-400
                  rounded-sm"
               />
               <Button
+                onClick={handleSendComment}
                 size="icon"
                 className="bg-linear-to-r from-indigo-600 to-violet-600
                  hover:scale-105 transition-all duration-200

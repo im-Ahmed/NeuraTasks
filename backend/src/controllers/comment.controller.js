@@ -22,11 +22,17 @@ const addComment = asyncHandler(async (req, res, _) => {
   if (!comment) {
     throw new ApiError(500, "Failed to add comment on task");
   }
+  const populatedComment = await Comment.findById(comment._id).populate(
+    "commentBY",
+    "_id avatar username"
+  );
   // Notify all user about new comment
-  broadcast({ type: "COMMENT_ADDED", comment });
+  broadcast({ type: "COMMENT_ADDED", comment: populatedComment });
   return res
     .status(200)
-    .json(new ApiResponse(200, { comment }, "Comment added successfully"));
+    .json(
+      new ApiResponse(200, populatedComment , "Comment added successfully")
+    );
 });
 const deleteComment = asyncHandler(async (req, res, _) => {
   const { commentId } = req.params;

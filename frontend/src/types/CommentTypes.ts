@@ -4,7 +4,7 @@ type CommentUser = {
   avatar: string;
 };
 export type Comment = {
-  task: string;
+  taskId: string;
   message: string;
   commentBY: CommentUser;
   _id: string;
