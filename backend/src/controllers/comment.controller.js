@@ -30,9 +30,7 @@ const addComment = asyncHandler(async (req, res, _) => {
   broadcast({ type: "COMMENT_ADDED", comment: populatedComment });
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, populatedComment , "Comment added successfully")
-    );
+    .json(new ApiResponse(200, populatedComment, "Comment added successfully"));
 });
 const deleteComment = asyncHandler(async (req, res, _) => {
   const { commentId } = req.params;
@@ -68,8 +66,12 @@ const editComment = asyncHandler(async (req, res, _) => {
   if (!comment) {
     throw new ApiError(500, "Failed to edit comment");
   }
+  const populatedEditedComment = await Comment.findById(comment._id).populate(
+    "commentBY",
+    "_id avatar username"
+  );
   // Notify all user about edited comment
-  broadcast({ type: "COMMENT_EDITED", comment });
+  broadcast({ type: "COMMENT_EDITED", comment: populatedEditedComment });
   return res
     .status(200)
     .json(new ApiResponse(200, { comment }, "Comment is edited successfully"));

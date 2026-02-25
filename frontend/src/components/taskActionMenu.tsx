@@ -42,13 +42,12 @@ export default function TaskActionMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <motion.div
-          whileHover={{ scale: 1.1 }}
           transition={{ duration: 0.2 }}
           >
             <Button
               size="icon"
-              variant="ghost"
-              className="h-10 w-full sm:w-10 "
+              variant="link"
+              className="text-white cursor-pointer"
             >
               <EllipsisVertical />
             </Button>

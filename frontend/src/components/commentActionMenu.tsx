@@ -10,11 +10,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useDeleteCommentMutation } from "@/features/comments/commentSlice";
 
-interface CommentActionMenuProps {
+type CommentActionMenuProps = {
   commentId: string;
-}
+  commentCurrntVal: string;
+  setCommentInput: (value: string) => void;
+  setEditingCommentId: (id: string | null) => void;
+};
 
-export function CommentActionMenu({ commentId }: CommentActionMenuProps) {
+export function CommentActionMenu({
+  commentId,
+  commentCurrntVal,
+  setCommentInput,
+  setEditingCommentId,
+}: CommentActionMenuProps) {
   const [open, setOpen] = useState(false);
   const [deleteComment, { isError: deletingError }] =
     useDeleteCommentMutation();
@@ -30,12 +38,13 @@ export function CommentActionMenu({ commentId }: CommentActionMenuProps) {
   };
 
   const handleEdit = () => {
-    console.log("Edit comment:", commentId);
+    setCommentInput(commentCurrntVal);
+    setEditingCommentId(commentId);
     setOpen(false);
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu  open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button className="p-1 hover:bg-white/10  rounded transition-colors duration-200">
           <MoreVertical className="h-4 w-4 text-white/70 hover:text-white" />

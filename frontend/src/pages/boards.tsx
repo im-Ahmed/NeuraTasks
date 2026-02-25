@@ -1,6 +1,6 @@
 // what is happening in this file on first time when use enter the board page a simple page is show with one card here is used temporary data and function which is clicked when user want to create board and create a new board that return outside
 // src/components/Board.tsx
-import {  useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Card,
@@ -25,7 +25,6 @@ import { useGetAllBoardQuery } from "@/features/board/realTimeBoardFetching";
 import type { Board, CreateBoardType } from "@/types/BoardTypes";
 import CreateBoard from "@/components/createBoard";
 import {
-  
   useAddBoardMutation,
   useDeleteBoardMutation,
 } from "@/features/board/boardSlice";
@@ -107,10 +106,27 @@ export default function Board() {
   const [deleteBoard, { isError: boardDeleteError }] = useDeleteBoardMutation();
   const [selectedItem, setSelectedItem] = useState<Board | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const boardsContainerRef = useRef<HTMLDivElement>(null);
 
   const boards = allBoards?.data?.boards ?? [];
 
   const isEmpty = boards.length === 0 && !boardLoading;
+
+  useEffect(() => {
+    const checkIfScrollable = () => {
+      if (boardsContainerRef.current) {
+        const isScroll =
+          boardsContainerRef.current.scrollHeight >
+          boardsContainerRef.current.clientHeight;
+        setIsScrollable(isScroll);
+      }
+    };
+
+    checkIfScrollable();
+    window.addEventListener("resize", checkIfScrollable);
+    return () => window.removeEventListener("resize", checkIfScrollable);
+  }, [boards]);
 
   // this is the function that pass as an argument to createbaord
   const handleBoardCreated = async (newBoardData: CreateBoardType) => {
@@ -260,59 +276,81 @@ export default function Board() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full"
+                className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full max-h-[calc(100vh-180px)]"
               >
                 {/* Sidebar */}
-                <div className="flex flex-col gap-4 lg:col-span-1">
-                  {boards.map((board: Board) => (
-                    <Card
-                      key={board._id}
-                      onClick={() => setSelectedItem(board)}
-                      className={cn(
-                        "cursor-pointer transition-all duration-200 bg-neutral-800/20 backdrop-blur border border-white/10 hover:bg-neutral-800/40 hover:border-white/20",
-                        selectedItem?._id === board._id &&
-                          "bg-white/10 border-white/30 ring-2 ring-[oklch(0.6_0.24_293.9)]/30",
-                      )}
-                    >
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 flex flex-col">
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg md:text-xl text-white">
-                                {board.title}
-                              </CardTitle>
+                <div
+                  ref={boardsContainerRef}
+                  className="relative flex flex-col gap-4 lg:col-span-1 overflow-y-auto h-full scroll-smooth [&::-webkit-scrollbar]:hidden"
+                >
+                  <div className="flex flex-col gap-4">
+                    {boards.map((board: Board) => (
+                      <Card
+                        key={board._id}
+                        onClick={() => setSelectedItem(board)}
+                        className={cn(
+                          "cursor-pointer transition-all duration-200 bg-neutral-800/20 backdrop-blur border border-white/10 hover:bg-neutral-800/40 hover:border-white/20",
+                          selectedItem?._id === board._id &&
+                            "bg-white/10 border-white/30 ring-2 ring-[oklch(0.6_0.24_293.9)]/30",
+                        )}
+                      >
+                        <CardHeader>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 flex flex-col">
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="text-lg md:text-xl text-white">
+                                  {board.title}
+                                </CardTitle>
 
-                              {
-                                // Menu buttons (three dots)
-                                selectedItem?._id === board._id && (
-                                  <ActionMenuRecommended
-                                    selectedBoard={selectedItem}
-                                    onDelete={handleDeleteBoard}
-                                    onUpdate={handleUpdateBoard}
-                                  />
-                                )
-                              }
+                                {
+                                  // Menu buttons (three dots)
+                                  selectedItem?._id === board._id && (
+                                    <ActionMenuRecommended
+                                      selectedBoard={selectedItem}
+                                      onDelete={handleDeleteBoard}
+                                      onUpdate={handleUpdateBoard}
+                                    />
+                                  )
+                                }
+                              </div>
+                              <CardDescription className="text-[#dce0ebe0] mt-1">
+                                {board.description}
+                              </CardDescription>
                             </div>
-                            <CardDescription className="text-[#dce0ebe0] mt-1">
-                              {board.description}
-                            </CardDescription>
                           </div>
-                        </div>
-                      </CardHeader>
+                        </CardHeader>
 
-                      <CardFooter className="justify-end">
-                        <span className="text-sm text-muted-foreground">
-                          {selectedItem?._id === board._id
-                            ? "Selected"
-                            : "Select →"}
-                        </span>
-                      </CardFooter>
-                    </Card>
-                  ))}
+                        <CardFooter className="justify-end">
+                          <span className="text-sm text-muted-foreground">
+                            {selectedItem?._id === board._id
+                              ? "Selected"
+                              : "Select →"}
+                          </span>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                  {boards.length > 0 && isScrollable && (
+                    <div className="sticky bottom-0 flex items-center justify-center py-4 text-white/40 bg-linear-to-t from-neutral-900 to-transparent">
+                      <svg
+                        className="w-5 h-5 animate-bounce"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content Area */}
-                <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur overflow-hidden h-full">
+                <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur overflow-hidden h-full flex flex-col">
                   <ScrollArea className="h-full px-8 py-10">
                     <div className="pr-6">
                       {selectedItem ? (

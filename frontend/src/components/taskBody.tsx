@@ -1,17 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ListChecks, MessageSquare } from "lucide-react";
+import { ListChecks, MessageSquare, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import TaskActionMenu from "../components/taskActionMenu";
 import { CommentActionMenu } from "./commentActionMenu";
 import type { Task } from "@/types/TaskTypes";
 import { useGetCommentQuery } from "@/features/comments/realTimeCommentFetching";
-import { useAddCommentMutation } from "@/features/comments/commentSlice";
-import {  useMemo, useState } from "react";
+import {
+  useAddCommentMutation,
+  useEditCommentMutation,
+} from "@/features/comments/commentSlice";
+import { useMemo, useState } from "react";
 import { isValidObjectId } from "@/pages/tasks";
 import Loader from "./ui/loader";
+import { Textarea } from "./ui/textarea";
 
 const formatDate = (iso: string) => {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -21,7 +24,7 @@ const formatDate = (iso: string) => {
   });
 };
 
-interface Props {
+type Props = {
   tasks: Task[];
   activeTaskId: string | null;
   onTaskSelect: (id: string) => void;
@@ -30,7 +33,7 @@ interface Props {
   // ✅ actions for menu
   onDeleteTask: (id: string) => void;
   onUpdateTask: (id: string) => void;
-}
+};
 
 export function TaskBody({
   tasks,
@@ -40,7 +43,11 @@ export function TaskBody({
   onDeleteTask,
   onUpdateTask,
 }: Props) {
-  const [addComment] = useAddCommentMutation();
+  const [addComment, { isLoading: commentAdding }] = useAddCommentMutation();
+  const [editComment, { isLoading: commentEditing }] = useEditCommentMutation();
+
+  const [commentInput, setCommentInput] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
   let activeTask = tasks.find((t) => t._id === activeTaskId);
   if (!activeTask) activeTask = tasks[0];
@@ -52,19 +59,27 @@ export function TaskBody({
     },
   );
 
-  const [commentInput, setCommentInput] = useState("");
-
- 
   const handleSendComment = async () => {
     if (commentInput.trim()) {
       try {
-        await addComment({
-          taskId: activeTask?._id,
-          message: commentInput,
-        }).unwrap();
-        setCommentInput("");
+        if (editingCommentId) {
+          // Edit existing comment
+          await editComment({
+            _id: editingCommentId,
+            message: commentInput,
+          }).unwrap();
+          setEditingCommentId(null);
+        } else {
+          // Add new comment
+          await addComment({
+            taskId: activeTask?._id,
+            message: commentInput,
+          }).unwrap();
+        }
       } catch (error) {
-        console.error("Failed to add comment:", error);
+        console.error("Failed to send comment:", error);
+      } finally {
+        setCommentInput("");
       }
     }
   };
@@ -72,7 +87,7 @@ export function TaskBody({
   const activeTaskComments = useMemo(
     () => allComments?.data.comments,
     [allComments],
-  );  
+  );
   if (tasks.length === 0) {
     return (
       <motion.div
@@ -101,40 +116,40 @@ export function TaskBody({
     <>
       {/* Horizontal Task List */}
       <motion.div
-        className="flex flex-wrap gap-3 overflow-x-auto pb-4"
+        className="w-full max-w-full overflow-hidden rounded-lg "
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h4 className="font-semibold text-white mb-2 flex items-center">
-          Task list
-        </h4>
-        {tasks.map((task) => (
-          <motion.div
-            key={task._id}
-            onClick={() => onTaskSelect(task._id)}
-            className={`relative w-fit min-w-60 max-w-full  cursor-pointer rounded-lg border bg-white/5 p-3 m-2 ${
-              task._id === activeTaskId
-                ? "border-white/30 ring-1 ring-[oklch(0.6_0.24_293.9)]/30"
-                : "border-white/10"
-            }`}
-            whileTap={{ scale: 0.98 }}
-          >
-            {/* Top-right three dots menu */}
-            <div className="absolute top-2 right-2">
-              <TaskActionMenu
-                selectedTask={task} // ✅ pass the current task here
-                onDelete={onDeleteTask}
-                onUpdate={onUpdateTask}
-              />
-            </div>
+        <div className="flex gap-4 overflow-x-auto overflow-y-hidden scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden">
+          {tasks.map((task) => (
+            <motion.div
+              key={task._id}
+              onClick={() => onTaskSelect(task._id)}
+              className={`relative shrink-0 w-auto min-w-60 px-4 cursor-pointer rounded-lg border bg-white/5 py-3 ${
+                task._id === activeTaskId
+                  ? "border-white/30 ring-1 ring-[oklch(0.6_0.24_293.9)]/30"
+                  : "border-white/10"
+              }`}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="absolute top-0 right-1">
+                <TaskActionMenu
+                  selectedTask={task}
+                  onDelete={onDeleteTask}
+                  onUpdate={onUpdateTask}
+                />
+              </div>
 
-            <h3 className="font-medium text-white capitalize">{task.title}</h3>
-            <p className="text-sm text-white/60 line-clamp-2 mt-1">
-              {task.description}
-            </p>
-          </motion.div>
-        ))}
+              <h3 className="font-medium text-white capitalize">
+                {task.title}
+              </h3>
+              <p className="text-sm text-white/60 line-clamp-2 mt-1">
+                {task.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
 
       {/* Active Task Panels */}
@@ -292,7 +307,12 @@ export function TaskBody({
                         {msg.commentBY?._id ===
                           localStorage.getItem("UserId") && (
                           <span className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <CommentActionMenu commentId={msg._id} />
+                            <CommentActionMenu
+                              commentId={msg._id}
+                              commentCurrntVal={msg.message}
+                              setCommentInput={setCommentInput}
+                              setEditingCommentId={setEditingCommentId}
+                            />
                           </span>
                         )}
                       </div>
@@ -312,22 +332,31 @@ export function TaskBody({
 
             {/* Input */}
             <div className="p-3 border-t border-white/10 flex gap-3 bg-white/2 backdrop-blur-md">
-              <Input
+              <Textarea
+                cols={1}
+                rows={1}
                 value={commentInput}
                 onChange={(e) => setCommentInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSendComment()}
                 placeholder="Type a message..."
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-400
-                 rounded-sm"
+                 rounded-sm "
               />
               <Button
+                disabled={
+                  !commentInput.trim() || commentAdding || commentEditing
+                }
                 onClick={handleSendComment}
                 size="icon"
-                className="bg-linear-to-r from-indigo-600 to-violet-600
+                className=" bg-linear-to-r from-indigo-600 to-violet-600
                  hover:scale-105 transition-all duration-200
                  rounded-sm shadow-lg shadow-indigo-500/30"
               >
-                →
+                {commentAdding || commentEditing ? (
+                  <Loader />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </motion.div>
