@@ -11,7 +11,10 @@ type WSEvent =
   | { type: "TASK_DELETED"; taskId: string };
 export const taskFetching = createApi({
   reducerPath: "taskFetching",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api/v1/tasks" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "/api/v1/tasks",
+    credentials: "include",
+  }),
   tagTypes: ["Tasks"], // Optional: Useful if you want to force-refetch manually later
   endpoints: (build) => ({
     getUserTasks: build.query<TaskResponse, void>({
@@ -152,4 +155,4 @@ export const taskFetching = createApi({
   }),
 });
 
-export const { useGetUserTasksQuery, useGetBoardTasksQuery , } = taskFetching;
+export const { useGetUserTasksQuery, useGetBoardTasksQuery } = taskFetching;

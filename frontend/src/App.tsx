@@ -10,6 +10,7 @@ import Board from "./pages/boards";
 import Task from "./pages/tasks";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import UserLayout from "./layouts/UserLayout";
+import MyTask from "./pages/MyTask";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
           <Route path="inbox" element={<h1>Inbox</h1>} key="inbox" />{" "}
           <Route path="board" element={<Board />} key="board" />
           <Route path="task" element={<Task />} key="task" />
-          <Route path="calendar" element={<h1>Calendar Page</h1>} />
+          <Route path="my-tasks" element={<MyTask/>} />
           <Route path="search" element={<h1>Search Page</h1>} />
           <Route path="settings" element={<h1>Settings Page</h1>} />
         </Route>
@@ -43,7 +44,10 @@ function App() {
               <UserLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Dashboard />} key="user-dashboard" />
+          <Route path="my-tasks" element={<MyTask/>} />
+        </Route>
         <Route path="test" element={<TestScreen />}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>

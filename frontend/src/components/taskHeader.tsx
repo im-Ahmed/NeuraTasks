@@ -13,13 +13,13 @@ import {
 import type { Board } from "@/types/BoardTypes";
 
 interface Props {
-  boards: Board[];
-  selectedBoardId: string | undefined;
-  onBoardChange: (id: string) => void;
-  onAssignClick: () => void;
+  boards?: Board[];
+  selectedBoardId?: string | undefined;
+  onBoardChange?: (id: string) => void;
+  onAssignClick?: () => void;
 }
-export function  TaskHeader({
-  boards,
+export function TaskHeader({
+  boards = [],
   selectedBoardId,
   onBoardChange,
   onAssignClick,
@@ -52,42 +52,46 @@ export function  TaskHeader({
           className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto"
         >
           {/* Board Select */}
-          <Select
-            value={selectedBoardId ?? undefined}
-            onValueChange={(value) => onBoardChange(value)}
-          >
-            <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-sm font-medium border-white/10 bg-white/5">
-              <SelectValue placeholder="Select Board" />
-            </SelectTrigger>
-            <SelectContent className="border-indigo-100 ">
-              {boards.map((board) => (
-                <SelectItem key={board._id} value={board._id as string}>
-                  {board.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {boards.length > 0 && onBoardChange && (
+            <Select
+              value={selectedBoardId ?? undefined}
+              onValueChange={(value) => onBoardChange(value)}
+            >
+              <SelectTrigger className="w-full sm:w-44 lg:w-48 h-10 sm:h-11 px-3 sm:px-4 rounded-sm font-medium border-white/10 bg-white/5">
+                <SelectValue placeholder="Select Board" />
+              </SelectTrigger>
+              <SelectContent className="border-indigo-100 ">
+                {boards.map((board) => (
+                  <SelectItem key={board._id} value={board._id as string}>
+                    {board.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           {/* Assign + Search + Settings — same line on mobile */}
           <div className="flex items-center gap-2 w-full sm:w-auto">
             {/* Assign Task — 50% width mobile */}
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="w-1/2 sm:w-auto"
-            >
-              <Button
-                onClick={onAssignClick}
-                className="w-full sm:w-auto justify-center gap-2 px-3 sm:px-4 h-10 sm:h-11 rounded-lg font-medium text-white shadow-sm"
-                style={{
-                  backgroundColor: "oklch(0.6 0.24 293.9)",
-                  boxShadow: "0 8px 24px oklch(0.6 0.24 293.9 / 0.25)",
-                }}
+            {onAssignClick && (
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-1/2 sm:w-auto"
               >
-                <Plus className="h-4 w-4" />
-                <span className=" sm:inline">Assign Task</span>
-              </Button>
-            </motion.div>
+                <Button
+                  onClick={onAssignClick}
+                  className="w-full sm:w-auto justify-center gap-2 px-3 sm:px-4 h-10 sm:h-11 rounded-lg font-medium text-white shadow-sm"
+                  style={{
+                    backgroundColor: "oklch(0.6 0.24 293.9)",
+                    boxShadow: "0 8px 24px oklch(0.6 0.24 293.9 / 0.25)",
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className=" sm:inline">Assign Task</span>
+                </Button>
+              </motion.div>
+            )}
 
             {/* Search */}
             <motion.div

@@ -281,7 +281,7 @@ export default function Board() {
                 {/* Sidebar */}
                 <div
                   ref={boardsContainerRef}
-                  className="relative flex flex-col gap-4 lg:col-span-1 overflow-y-auto h-full scroll-smooth [&::-webkit-scrollbar]:hidden"
+                  className="order-2 lg:order-1 relative flex flex-col gap-4 lg:col-span-1 overflow-y-auto h-full scroll-smooth [&::-webkit-scrollbar]:hidden"
                 >
                   <div className="flex flex-col gap-4">
                     {boards.map((board: Board) => (
@@ -350,8 +350,8 @@ export default function Board() {
                 </div>
 
                 {/* Content Area */}
-                <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur overflow-hidden h-full flex flex-col">
-                  <ScrollArea className="h-full px-8 py-10">
+                <div className="lg:col-span-2 order-1 lg:order-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur overflow-hidden h-full flex flex-col">
+                  <ScrollArea className="h-full px-8 py-10 ">
                     <div className="pr-6">
                       {selectedItem ? (
                         renderBoardContent(selectedItem)
@@ -361,7 +361,7 @@ export default function Board() {
                             Select a board
                           </h2>
                           <p className="text-lg text-white/60">
-                            Click any card on the left to view its content
+                            Click any board to view its content
                           </p>
                         </div>
                       )}

@@ -31,8 +31,14 @@ type Props = {
   onAssignClick: () => void;
 
   // ✅ actions for menu
-  onDeleteTask: (id: string) => void;
+  onDeleteTask?: (id: string) => void;
   onUpdateTask: (id: string) => void;
+
+  /**
+   * When set to false the delete option will be hidden from the task action menu.
+   * Defaults to true for existing usages.
+   */
+  allowDelete?: boolean;
 };
 
 export function TaskBody({
@@ -42,6 +48,7 @@ export function TaskBody({
   onAssignClick,
   onDeleteTask,
   onUpdateTask,
+  allowDelete = true,
 }: Props) {
   const [addComment, { isLoading: commentAdding }] = useAddCommentMutation();
   const [editComment, { isLoading: commentEditing }] = useEditCommentMutation();
@@ -52,12 +59,14 @@ export function TaskBody({
   let activeTask = tasks.find((t) => t._id === activeTaskId);
   if (!activeTask) activeTask = tasks[0];
   // get comments for active task
+  console.log("activeTask id", activeTask?._id);
   const { data: allComments, isLoading: commentLoading } = useGetCommentQuery(
     activeTask?._id as string,
     {
       skip: !isValidObjectId(activeTask?._id),
     },
   );
+  console.log("activeTaskComments", allComments?.data?.comments);
 
   const handleSendComment = async () => {
     if (commentInput.trim()) {
@@ -85,7 +94,7 @@ export function TaskBody({
   };
 
   const activeTaskComments = useMemo(
-    () => allComments?.data.comments,
+    () => allComments?.data?.comments || [],
     [allComments],
   );
   if (tasks.length === 0) {
@@ -136,8 +145,9 @@ export function TaskBody({
               <div className="absolute top-0 right-1">
                 <TaskActionMenu
                   selectedTask={task}
-                  onDelete={onDeleteTask}
+                  onDelete={onDeleteTask ?? (() => {})}
                   onUpdate={onUpdateTask}
+                  allowDelete={allowDelete}
                 />
               </div>
 
@@ -254,7 +264,7 @@ export function TaskBody({
               <div className="p-2 rounded-lg bg-indigo-500/10">
                 <MessageSquare className="h-4 w-4 text-indigo-400" />
               </div>
-              Board Chat
+              <p>{activeTask.title}</p>
             </div>
 
             {/* Messages */}
@@ -267,7 +277,7 @@ export function TaskBody({
                 </div>
               ) : (
                 <>
-                  {activeTaskComments?.map((msg) => (
+                  {activeTaskComments.map((msg) => (
                     <div
                       key={msg._id}
                       className={`flex items-end gap-3 ${

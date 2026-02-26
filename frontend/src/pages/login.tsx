@@ -29,6 +29,7 @@ const Login = () => {
       const loginResponse = await loginUser(formData).unwrap();
       setLoading(false);
       localStorage.setItem("UserId", loginResponse.data.user._id!);
+      localStorage.setItem("UserRole", loginResponse.data.user.role!);
       loginResponse.data.user.role === "admin"
         ? (window.location.href = "/dashboard")
         : (window.location.href = "/user-dashboard");

@@ -45,12 +45,16 @@ const items = [
   { title: "Inbox", url: "/dashboard/inbox", icon: Inbox },
   { title: "Boards", url: "/dashboard/board", icon: Notebook },
   { title: "Tasks", url: "/dashboard/task", icon: Notebook },
-  { title: "Calendar", url: "/dashboard/calendar", icon: Calendar },
+  {
+    title: "My tasks",
+    url: `/${localStorage.getItem("UserRole") === "admin" ? "dashboard" : "user-dashboard"}/my-tasks`,
+    icon: Calendar,
+  },
   { title: "Search", url: "/dashboard/search", icon: Search },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 const AvatarPreview = memo(function AvatarPreview() {
-  const { data: userResponse, } = useGetUserProfileQuery();
+  const { data: userResponse } = useGetUserProfileQuery();
 
   const user = userResponse?.data.user;
   const initials = useMemo(() => {
@@ -114,7 +118,7 @@ export function AppSidebar() {
           aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           className="
       fixed right-0 top-1/2 -translate-y-1/2
-      z-[100]
+      z-100
       p-1 bg-gray-400
       text-gray-700 hover:text-black
       transition

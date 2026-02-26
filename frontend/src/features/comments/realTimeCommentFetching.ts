@@ -81,7 +81,7 @@ export const commentFetching = createApi({
         } finally {
           // 4. Cleanup when the component unmounts
           await cacheEntryRemoved;
-          ws.close();
+          // ws.close();
         }
       },
     }),

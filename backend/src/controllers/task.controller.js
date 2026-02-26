@@ -154,18 +154,18 @@ const updateTaskDetails = asyncHandler(async (req, res, _) => {
 });
 const getAllUserTasks = asyncHandler(async (req, res, _) => {
   const userId = req.user._id;
-  const userTasks = await Task.find({
+  const tasks = await Task.find({
     assignedTo: {
       $in: [userId],
     },
   }).select("-assignedTo");
-  if (!userTasks) {
+  if (!tasks) {
     throw new ApiError(500, "Failed to get user tasks");
   }
   return res
     .status(200)
     .json(
-      new ApiResponse(200, { userTasks }, "User tasks fetched successfully")
+      new ApiResponse(200, { tasks }, "User tasks fetched successfully")
     );
 });
 

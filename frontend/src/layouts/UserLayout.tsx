@@ -7,8 +7,8 @@ export default function UserLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex-1 bg-neutral-800 text-white w-screen h-screen">
-        {/* <SidebarTrigger className="absolute opacity-[0] hover:opacity-[100] "/> */}
+      <main className="flex flex-col flex-1 min-w-0 overflow-hidden gap-6">
+   
         <Outlet /> {/* renders nested pages */}
       </main>
     </SidebarProvider>

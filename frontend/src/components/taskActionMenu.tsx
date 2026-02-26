@@ -27,12 +27,18 @@ interface Props {
   selectedTask: Task | null;
   onDelete: (id: string) => void;
   onUpdate: (id: string) => void;
+  /**
+   * Controls whether the delete option is shown in the menu.
+   * Default is `true` for backward compatibility.
+   */
+  allowDelete?: boolean;
 }
 
 export default function TaskActionMenu({
   selectedTask,
   onDelete,
   onUpdate,
+  allowDelete = true,
 }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const disabled = !selectedTask;
@@ -41,9 +47,7 @@ export default function TaskActionMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <motion.div
-          transition={{ duration: 0.2 }}
-          >
+          <motion.div transition={{ duration: 0.2 }}>
             <Button
               size="icon"
               variant="link"
@@ -69,50 +73,57 @@ export default function TaskActionMenu({
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem
-            disabled={disabled}
-            onClick={() => setConfirmOpen(true)}
-            className="gap-2 text-red-600"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </DropdownMenuItem>
+          {allowDelete && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                disabled={disabled}
+                onClick={() => setConfirmOpen(true)}
+                className="gap-2 text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
       {/* ✅ Delete Confirm Dialog */}
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Task</DialogTitle>
-          </DialogHeader>
+      {allowDelete && (
+        <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Task</DialogTitle>
+            </DialogHeader>
 
-          <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete
-            <span className="font-semibold text-red-500">
-              {" "}
-              {selectedTask?.title}
-            </span>
-            ?
-          </p>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete
+              <span className="font-semibold text-red-500">
+                {" "}
+                {selectedTask?.title}
+              </span>
+              ?
+            </p>
 
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
-              Cancel
-            </Button>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
+                Cancel
+              </Button>
 
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (selectedTask) onDelete(selectedTask._id);
-                setConfirmOpen(false);
-              }}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (selectedTask) onDelete(selectedTask._id);
+                  setConfirmOpen(false);
+                }}
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }
